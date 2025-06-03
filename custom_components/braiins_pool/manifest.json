@@ -1,0 +1,30 @@
+{
+  "domain": "braiins_pool",
+  "name": "Braiins Pool",
+  "documentation": "https://github.com/your_github_username/homeassistant-braiins-pool",
+  "issue_tracker": "https://github.com/your_github_username/homeassistant-braiins-pool/issues",
+  "codeowners": [
+    "@your_github_username"
+  ],
+  "version": "0.1.0",
+  "iot_class": "cloud_polling",
+  "requirements": [
+    "aiohttp"
+  ],
+  "config_flow": true
+}
+{
+  "domain": "braiins_pool",
+  "name": "Braiins Pool",
+  "documentation": "https://github.com/your_github_username/homeassistant-braiins-pool",
+  "issue_tracker": "https://github.com/your_github_username/homeassistant-braiins-pool/issues",
+  "codeowners": [
+    "@your_github_username"
+  ],
+  "version": "0.1.0",
+  "iot_class": "cloud_polling",
+  "requirements": [
+    "aiohttp"
+  ],
+  "config_flow": true
+}

@@ -21,16 +21,19 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
         """Helper to create a mock ClientResponse."""
         mock_resp = MagicMock()
         mock_resp.status = status
-        mock_resp.json = AsyncMock(return_value=json_data if json_data is not None else {})
+        mock_resp.json = AsyncMock(
+            return_value=json_data if json_data is not None else {}
+        )
         mock_resp.raise_for_status = MagicMock()  # Add raise_for_status mock
-        mock_resp.text = AsyncMock(return_value="Error response text") # Add text mock
+        mock_resp.text = AsyncMock(return_value="Error response text")  # Add text mock
 
         if status >= 400:
- mock_resp.raise_for_status.side_effect = ClientError(f"Mock HTTP error {status}")
+            mock_resp.raise_for_status.side_effect = ClientError(
+                f"Mock HTTP error {status}"
+            )
 
- # Mock __aenter__ and __aexit__ for async context manager
+        # Mock __aenter__ and __aexit__ for async context manager
         return mock_resp
-
 
     @patch("custom_components.braiins_pool.api._LOGGER")
     async def test_get_account_stats_success(self, mock_logger):
@@ -45,7 +48,7 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
         self.mock_session.get.assert_awaited_once_with(
             BRAIINS_API_URL, headers={"Pool-Auth-Token": self.api_key}
         )
-        self.assertEqual(data, mock_data) # Assert data matches mock_data
+        self.assertEqual(data, mock_data)  # Assert data matches mock_data
         mock_logger.debug.assert_called()  # Check if debug logging was called
 
     @patch("custom_components.braiins_pool.api._LOGGER")
@@ -60,8 +63,8 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
 
         self.mock_session.get.assert_awaited_once_with(
             BRAIINS_API_URL, headers={"Pool-Auth-Token": self.api_key}
-        ) # Assert URL and headers
-        self.mock_session.get.return_value.__aenter__.return_value.raise_for_status.assert_called_once() # Assert raise_for_status was called
+        )  # Assert URL and headers
+        self.mock_session.get.return_value.__aenter__.return_value.raise_for_status.assert_called_once()  # Assert raise_for_status was called
         mock_logger.error.assert_called()  # Check if error logging was called for 401
 
     @patch("custom_components.braiins_pool.api._LOGGER")
@@ -76,8 +79,8 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
 
         self.mock_session.get.assert_awaited_once_with(
             BRAIINS_API_URL, headers={"Pool-Auth-Token": self.api_key}
-        ) # Assert URL and headers
-        self.mock_session.get.return_value.__aenter__.return_value.raise_for_status.assert_called_once() # Assert raise_for_status was called
+        )  # Assert URL and headers
+        self.mock_session.get.return_value.__aenter__.return_value.raise_for_status.assert_called_once()  # Assert raise_for_status was called
         mock_logger.error.assert_called()  # Check if error logging was called for 500
 
     @patch("custom_components.braiins_pool.api._LOGGER")
@@ -95,7 +98,7 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
         self.mock_session.get.assert_awaited_once_with(
             expected_url, headers={"Pool-Auth-Token": self.api_key}
         )
-        self.assertEqual(reward, 0.12345) # Assert the parsed reward value
+        self.assertEqual(reward, 0.12345)  # Assert the parsed reward value
         mock_logger.debug.assert_called()  # Check if debug logging was called
 
     @patch("custom_components.braiins_pool.api._LOGGER")
@@ -113,7 +116,7 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
         self.mock_session.get.assert_awaited_once_with(
             expected_url, headers={"Pool-Auth-Token": self.api_key}
         )
-        self.mock_session.get.return_value.__aenter__.return_value.raise_for_status.assert_called_once() # Assert raise_for_status was called
+        self.mock_session.get.return_value.__aenter__.return_value.raise_for_status.assert_called_once()  # Assert raise_for_status was called
         mock_logger.error.assert_called()  # Check if error logging was called
 
     @patch("custom_components.braiins_pool.api._LOGGER")
@@ -132,7 +135,7 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
         self.mock_session.get.assert_awaited_once_with(
             expected_url, headers={"Pool-Auth-Token": self.api_key}
         )
-        self.mock_session.get.return_value.__aenter__.return_value.raise_for_status.assert_called_once() # Ensure raise_for_status is still checked
+        self.mock_session.get.return_value.__aenter__.return_value.raise_for_status.assert_called_once()  # Ensure raise_for_status is still checked
         mock_logger.error.assert_called()  # Check if error logging was called
 
     @patch("custom_components.braiins_pool.api._LOGGER")
@@ -151,7 +154,7 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
         self.mock_session.get.assert_awaited_once_with(
             expected_url, headers={"Pool-Auth-Token": self.api_key}
         )
-        self.mock_session.get.return_value.__aenter__.return_value.raise_for_status.assert_called_once() # Ensure raise_for_status is still checked
+        self.mock_session.get.return_value.__aenter__.return_value.raise_for_status.assert_called_once()  # Ensure raise_for_status is still checked
         mock_logger.error.assert_called_once()  # Check if error logging was called exactly once
 
     @patch("custom_components.braiins_pool.api._LOGGER")
@@ -160,10 +163,12 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
         # Update the expected URL based on the actual implementation
         expected_url = "https://pool.braiins.com/accounts/rewards/json/btc"
         self.mock_session.get.return_value.__aenter__.return_value = (
-            await self.mock_response(json_data=None, status=200) # Simulate a valid HTTP response but invalid JSON
+            await self.mock_response(
+                json_data=None, status=200
+            )  # Simulate a valid HTTP response but invalid JSON
         )
-        self.mock_session.get.return_value.__aenter__.return_value.json.side_effect = ContentTypeError(
-            MagicMock(), MagicMock()
+        self.mock_session.get.return_value.__aenter__.return_value.json.side_effect = (
+            ContentTypeError(MagicMock(), MagicMock())
         )
 
         with self.assertRaises(ContentTypeError):
@@ -172,7 +177,7 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
         self.mock_session.get.assert_awaited_once_with(
             expected_url, headers={"Pool-Auth-Token": self.api_key}
         )
-        mock_logger.error.assert_called_once() # Ensure error logging was called
+        mock_logger.error.assert_called_once()  # Ensure error logging was called
 
     @patch("custom_components.braiins_pool.api._LOGGER")
     async def test_get_daily_rewards_client_error(self, mock_logger):
@@ -183,8 +188,13 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
         with self.assertRaises(ClientError):
             await self.api_client.get_daily_rewards()
 
-        self.mock_session.get.assert_awaited_once_with(expected_url, headers={"Pool-Auth-Token": self.api_key})
-        mock_logger.error.assert_called_once_with("Error fetching data from %s: %s", expected_url, "Network issue")
+        self.mock_session.get.assert_awaited_once_with(
+            expected_url, headers={"Pool-Auth-Token": self.api_key}
+        )
+        mock_logger.error.assert_called_once_with(
+            "Error fetching data from %s: %s", expected_url, "Network issue"
+        )
+
     # Add more test cases for different error conditions, data structures, etc.
 
 

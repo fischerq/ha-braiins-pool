@@ -1,4 +1,5 @@
 """Config flow for Braiins Pool integration."""
+
 import logging
 
 import voluptuous as vol
@@ -26,11 +27,13 @@ class BraiinsPoolConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         # Basic validation (can add API call validation later)
         if not user_input.get(CONF_API_KEY):
-            errors["base"] = "invalid_api_key" # Use a specific error code
+            errors["base"] = "invalid_api_key"  # Use a specific error code
 
         if not errors:
             # Check if already configured (if only one instance is allowed)
-            await self.async_set_unique_id(DOMAIN) # Or a more specific ID if available from API
+            await self.async_set_unique_id(
+                DOMAIN
+            )  # Or a more specific ID if available from API
             self._abort_if_unique_id_configured()
 
             return self.async_create_entry(title="Braiins Pool", data=user_input)
@@ -49,8 +52,10 @@ class BraiinsPoolConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="user",
             data_schema=data_schema,
             errors=errors,
-            last_step=True # Assuming this is the only configuration step for now
+            last_step=True,  # Assuming this is the only configuration step for now
         )
+
+
 """Config flow for Braiins Pool integration."""
 import logging
 
@@ -79,13 +84,14 @@ class BraiinsPoolConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         # Basic validation (can add API call validation later)
         if not user_input.get(CONF_API_KEY):
-            errors["base"] = "invalid_api_key" # Use a specific error code
+            errors["base"] = "invalid_api_key"  # Use a specific error code
 
         if not errors:
             # Check if already configured (if only one instance is allowed)
-            await self.async_set_unique_id(DOMAIN) # Or a more specific ID if available from API
+            await self.async_set_unique_id(
+                DOMAIN
+            )  # Or a more specific ID if available from API
             self._abort_if_unique_id_configured()
-
 
             return self.async_create_entry(title="Braiins Pool", data=user_input)
 
@@ -103,5 +109,5 @@ class BraiinsPoolConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="user",
             data_schema=data_schema,
             errors=errors,
-            last_step=True # Assuming this is the only configuration step for now
+            last_step=True,  # Assuming this is the only configuration step for now
         )

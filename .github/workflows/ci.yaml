@@ -1,0 +1,29 @@
+name: CI
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11' # Or your desired Python version
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        # Assume dependencies are in requirements.txt
+        # If you don't have requirements.txt, you'll need to list them here or use a different method
+        # Example: pip install aiohttp voluptuous homeassistant
+        # For testing: pip install pytest unittest-mock
+        pip install -r requirements.txt || echo "requirements.txt not found, skipping dependency installation via file"
+        pip install pytest unittest-mock  # Ensure testing dependencies are installed
+
+    - name: Run tests
+      run: ./run_tests.sh

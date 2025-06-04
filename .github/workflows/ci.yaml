@@ -24,7 +24,6 @@ jobs:
         # Example: pip install aiohttp voluptuous homeassistant
         # For testing: pip install pytest unittest-mock
         pip install -r requirements.txt || echo "requirements.txt not found, skipping dependency installation via file"
-        pip install pytest unittest-mock  # Ensure testing dependencies are installed
 
     - name: Run tests
       run: ./run_tests.sh

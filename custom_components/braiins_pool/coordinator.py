@@ -95,4 +95,4 @@ class BraiinsDataUpdateCoordinator(DataUpdateCoordinator[dict]):
             _LOGGER.error(
                 "Error fetching or processing data from Braiins Pool API: %s", err
             )
-            raise UpdateFailed(f"Error updating data: {err}") from err
+            raise UpdateFailed(f"Error updating data: {err}")

@@ -20,6 +20,7 @@ _LOGGER = logging.getLogger(__name__)
 
 from .api import BraiinsPoolApiClient
 
+
 # Import the actual API client
 class BraiinsDataUpdateCoordinator(DataUpdateCoordinator[dict]):
     """Coordinate updates from the Braiins Pool API."""

@@ -9,6 +9,7 @@ from homeassistant.helpers.update_coordinator import UpdateFailed
 
 pytestmark = pytest.mark.asyncio  # This line should come after imports
 
+
 @pytest.mark.asyncio
 async def test_successful_update(hass):
     "Test successful data update."
@@ -18,15 +19,17 @@ async def test_successful_update(hass):
         "btc": {"daily_rewards": [{"total_reward": "0.123"}]}
     }
 
-    with patch("custom_components.braiins_pool.coordinator.DEFAULT_SCAN_INTERVAL", 60), patch("custom_components.braiins_pool.const.DEFAULT_SCAN_INTERVAL", 60):
+    with patch(
+        "custom_components.braiins_pool.coordinator.DEFAULT_SCAN_INTERVAL", 60
+    ), patch("custom_components.braiins_pool.const.DEFAULT_SCAN_INTERVAL", 60):
 
-        	await coordinator.async_refresh()
+        await coordinator.async_refresh()
 
-        	mock_api_client.get_account_stats.assert_called_once()
-        	mock_api_client.get_daily_rewards.assert_called_once()
-        	assert coordinator.data is not None
-        	assert coordinator.data["current_balance"] == 1.23
-        	assert coordinator.data["today_reward"] == 0.123
+        mock_api_client.get_account_stats.assert_called_once()
+        mock_api_client.get_daily_rewards.assert_called_once()
+        assert coordinator.data is not None
+        assert coordinator.data["current_balance"] == 1.23
+        assert coordinator.data["today_reward"] == 0.123
 
 
 @pytest.mark.asyncio
@@ -39,7 +42,9 @@ async def test_update_failed_api_error(hass):
         "btc": {"daily_rewards": [{"total_reward": "0.123"}]}
     }
 
-    with patch("custom_components.braiins_pool.coordinator.DEFAULT_SCAN_INTERVAL", 60),patch("custom_components.braiins_pool.const.DEFAULT_SCAN_INTERVAL", 60):
+    with patch(
+        "custom_components.braiins_pool.coordinator.DEFAULT_SCAN_INTERVAL", 60
+    ), patch("custom_components.braiins_pool.const.DEFAULT_SCAN_INTERVAL", 60):
         with pytest.raises(UpdateFailed):
             await coordinator.async_refresh()
 
@@ -57,7 +62,9 @@ async def test_update_failed_parsing_error(hass):
         "btc": {"daily_rewards": [{"total_reward": "0.123"}]}
     }
 
-    with patch("custom_components.braiins_pool.coordinator.DEFAULT_SCAN_INTERVAL", 60), patch("custom_components.braiins_pool.const.DEFAULT_SCAN_INTERVAL", 60):
+    with patch(
+        "custom_components.braiins_pool.coordinator.DEFAULT_SCAN_INTERVAL", 60
+    ), patch("custom_components.braiins_pool.const.DEFAULT_SCAN_INTERVAL", 60):
 
         with pytest.raises(UpdateFailed):
             await coordinator.async_refresh()

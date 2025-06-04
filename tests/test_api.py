@@ -33,7 +33,7 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
             )
 
         # Mock __aenter__ and __aexit__ for async context manager
-		pytestmark = pytest.mark.asyncio
+        pytestmark = pytest.mark.asyncio
         return mock_resp
 
     @patch("custom_components.braiins_pool.api._LOGGER")

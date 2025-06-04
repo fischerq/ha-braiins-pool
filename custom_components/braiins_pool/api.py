@@ -11,8 +11,6 @@ BRAIINS_API_URL = "https://pool.braiins.com/stats/json/btc/"
 BRAIINS_DAILY_REWARDS_URL = "https://pool.braiins.com/stats/json/btc/rewards/"
 
 
-
-
 class BraiinsPoolApiException(Exception):
     """Base exception for Braiins Pool API."""
 
@@ -25,7 +23,6 @@ class BraiinsPoolApiClient:
     """API client for Braiins Pool."""
 
     _LOGGER = logging.getLogger(__name__)
-
 
     def __init__(self, session: aiohttp.ClientSession, api_key: str):
         """Initialize."""
@@ -45,13 +42,17 @@ class BraiinsPoolApiClient:
                 response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
                 return await response.json()
         except aiohttp.ClientResponseError as err:
-            if err.status == 403: # Changed from 401 to 403 based on common API practices for forbidden access with valid key format but insufficient permissions
-                self._LOGGER.error("Braiins Pool API Authentication Error: Invalid API key or insufficient permissions.")
+            if (
+                err.status == 403
+            ):  # Changed from 401 to 403 based on common API practices for forbidden access with valid key format but insufficient permissions
+                self._LOGGER.error(
+                    "Braiins Pool API Authentication Error: Invalid API key or insufficient permissions."
+                )
                 raise BraiinsPoolAuthError("Invalid API key") from err
             self._LOGGER.error(
                 "Error fetching account stats from Braiins Pool API: Status %s, %s",
                 response.status,
- await response.text(),  # Use response.text() for more detailed error info
+                await response.text(),  # Use response.text() for more detailed error info
             )
             raise BraiinsPoolApiException(
                 f"API error {response.status}: {await response.text()}"
@@ -59,7 +60,7 @@ class BraiinsPoolApiClient:
         except aiohttp.ClientError as err:
             _LOGGER.error(
                 "Error fetching account stats from Braiins Pool API: Network or client error: %s",
- err,
+                err,
             )
             raise BraiinsPoolApiException(f"Network or client error: {err}") from err
 
@@ -96,7 +97,7 @@ class BraiinsPoolApiClient:
                 self._LOGGER.error("Error parsing daily rewards response: %s", e)
                 # Return None or raise a specific error if parsing fails
                 return None
-        except BraiinsPoolApiException as err: # Added 'as err' to access error details
+        except BraiinsPoolApiException as err:  # Added 'as err' to access error details
             # Re-raise the specific API exceptions from the _request helper
             self._LOGGER.error(
                 "Error fetching daily rewards from Braiins Pool API: API error %s, %s",
@@ -108,6 +109,6 @@ class BraiinsPoolApiClient:
             # Re-raise the specific API exceptions from the _request helper
             _LOGGER.error(
                 "Error fetching daily rewards from Braiins Pool API: Network or client error: %s",
- err,
+                err,
             )
             raise err

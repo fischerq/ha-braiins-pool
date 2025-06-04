@@ -5,4 +5,6 @@
 PYTHONPATH=.
 echo "running ls"
 ls .
+echo "echo pypath"
+echo $PYTHONPATH
 pytest tests/

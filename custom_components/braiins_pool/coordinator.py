@@ -47,8 +47,13 @@ class BraiinsDataUpdateCoordinator(DataUpdateCoordinator[dict]):
 
         try:
             daily_rewards_data = await self.api_client.get_daily_rewards()
-            processed_data["today_reward"] = daily_rewards_data
-
+            today_reward_str = daily_rewards_data.get("btc", {}).get("daily_rewards", [{}])[0].get("total_reward", "0")
+            try:
+                processed_data["today_reward"] = float(today_reward_str)
+            except (ValueError, KeyError, IndexError):
+                _LOGGER.warning("Could not convert daily reward '%s' to float or access the data. Setting to 0.", today_reward_str)
+                processed_data["today_reward"] = 0.0
+                
             # Fetch overall stats - assuming this endpoint provides current_balance and all_time_reward
             data = await self.api_client.get_account_stats()
 

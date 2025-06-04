@@ -93,3 +93,11 @@ class BraiinsPoolApiClient:
             )
             raise BraiinsPoolApiException(f"API error: Status {err.status}") from err
         except aiohttp.ClientError as err:
+            # Re-raise the specific API exceptions from the _request helper
+            _LOGGER.error(
+                "Error fetching daily rewards from Braiins Pool API: HTTP client error %s, %s",
+                err.status,
+                err.message,
+            )
+            raise err
+

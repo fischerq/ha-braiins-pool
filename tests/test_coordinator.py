@@ -27,7 +27,6 @@ async def test_successful_update(hass):
 
     mock_api_client.get_account_stats.assert_called_once()
     mock_api_client.get_daily_rewards.assert_called_once()
-    assert coordinator.data is not None
     assert coordinator.data["current_balance"] == 1.23
     assert coordinator.data["today_reward"] == 0.123
 
@@ -83,7 +82,7 @@ async def test_update_failed_daily_rewards_parsing_error(hass):
     }  # Missing daily_rewards key
 
     coordinator = BraiinsDataUpdateCoordinator(
-        hass, mock_api_client, DEFAULT_SCAN_INTERVAL
+        hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
     )
 
     with pytest.raises(UpdateFailed):

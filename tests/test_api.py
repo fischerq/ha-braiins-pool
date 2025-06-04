@@ -35,7 +35,6 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
 
         # Mock __aenter__ and __aexit__ for async context manager
         pytestmark = pytest.mark.asyncio
-        return mock_resp
 
     @patch("custom_components.braiins_pool.api._LOGGER")
     async def test_get_account_stats_success(self, mock_logger):

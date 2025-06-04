@@ -5,10 +5,18 @@ import aiohttp
 
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import API_HEADERS, CONF_API_KEY
-
-BRAIINS_API_URL = "https://pool.braiins.com/stats/json/btc/"
-BRAIINS_DAILY_REWARDS_URL = "https://pool.braiins.com/stats/json/btc/rewards/"
+from .const import (
+    API_HEADERS,
+    CONF_API_KEY,
+    API_URL_POOL_STATS,
+    API_URL_DAILY_REWARDS,
+    API_URL_USER_PROFILE,
+    API_URL_DAILY_HASHRATE,
+    API_URL_BLOCK_REWARDS,
+    API_URL_WORKERS,
+    API_URL_PAYOUTS,
+    DEFAULT_COIN,
+)
 
 
 class BraiinsPoolApiException(Exception):
@@ -66,49 +74,35 @@ class BraiinsPoolApiClient:
 
     async def get_account_stats(self):
         """Fetch account statistics from Braiins Pool API."""
-        # Assuming BRAIINS_API_URL is the correct endpoint for account stats
-        data = await self._request(BRAIINS_API_URL)
-        # Return the raw data for the coordinator to process
-        return data
+        url = API_URL_POOL_STATS.format(DEFAULT_COIN)
+        return await self._request(url)
 
     async def get_daily_rewards(self):
         """Fetch daily rewards from Braiins Pool API."""
-        # Assuming this is the correct and full URL for daily rewards
-        daily_rewards_url = BRAIINS_DAILY_REWARDS_URL
-        try:
-            data = await self._request(daily_rewards_url)
-            # Parse the total_reward from the provided structure
-            try:
-                # Assuming the structure is consistent: data['btc']['daily_rewards'][0]['total_reward']
-                # It might be safer to iterate through 'daily_rewards' if there can be multiple entries
-                # and sum them up or take the most recent. For now, sticking to the original logic.
-                total_reward_str = (
-                    data.get("btc", {})
-                    .get("daily_rewards", [{}])[0]
-                    .get("total_reward")
-                )
-                if total_reward_str is None:
-                    self._LOGGER.warning(
-                        "Daily rewards data structure unexpected. 'total_reward' not found."
-                    )
-                    return None
-                return float(total_reward_str)
-            except (KeyError, IndexError, ValueError) as e:
-                self._LOGGER.error("Error parsing daily rewards response: %s", e)
-                # Return None or raise a specific error if parsing fails
-                return None
-        except BraiinsPoolApiException as err:  # Added 'as err' to access error details
-            # Re-raise the specific API exceptions from the _request helper
-            self._LOGGER.error(
-                "Error fetching daily rewards from Braiins Pool API: API error %s, %s",
-                err.status,
-                err.message,
-            )
-            raise BraiinsPoolApiException(f"API error: Status {err.status}") from err
-        except aiohttp.ClientError as err:
-            # Re-raise the specific API exceptions from the _request helper
-            _LOGGER.error(
-                "Error fetching daily rewards from Braiins Pool API: Network or client error: %s",
-                err,
-            )
-            raise err
+        url = API_URL_DAILY_REWARDS.format(DEFAULT_COIN)
+        return await self._request(url)
+
+    async def get_user_profile(self, coin=DEFAULT_COIN):
+        """Fetch user profile from Braiins Pool API."""
+        url = API_URL_USER_PROFILE.format(coin)
+        return await self._request(url)
+
+    async def get_daily_hashrate(self, group="user", coin=DEFAULT_COIN):
+        """Fetch daily hashrate from Braiins Pool API."""
+        url = API_URL_DAILY_HASHRATE.format(group, coin)
+        return await self._request(url)
+
+    async def get_block_rewards(self, from_date: str, to_date: str, coin=DEFAULT_COIN):
+        """Fetch block rewards from Braiins Pool API."""
+        url = API_URL_BLOCK_REWARDS.format(coin, from_date, to_date)
+        return await self._request(url)
+
+    async def get_workers(self, coin=DEFAULT_COIN):
+        """Fetch worker data from Braiins Pool API."""
+        url = API_URL_WORKERS.format(coin)
+        return await self._request(url)
+
+    async def get_payouts(self, from_date: str, to_date: str, coin=DEFAULT_COIN):
+        """Fetch payouts data from Braiins Pool API."""
+        url = API_URL_PAYOUTS.format(coin, from_date, to_date)
+        return await self._request(url)

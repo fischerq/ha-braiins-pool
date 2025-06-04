@@ -1,7 +1,7 @@
 """Unit tests for the Braiins Pool coordinator."""
 
 import pytest
-from datetime import timedelta
+from datetime import timedelta, datetime, date
 from unittest.mock import AsyncMock, patch
 
 from aiohttp import ClientError
@@ -27,9 +27,68 @@ async def test_successful_update(hass):
     await coordinator.async_refresh()
 
     mock_api_client.get_account_stats.assert_called_once()
+    mock_api_client.get_daily_rewards.assert_called_once()  # Keep this assertion for now, will refine later
+
+
+@pytest.mark.asyncio
+@patch("custom_components.braiins_pool.coordinator.datetime")
+async def test_successful_update_with_new_data(mock_datetime, hass):
+    "Test successful data update including new endpoints."
+    # Mock datetime to return a fixed date for predictable date calculations
+    mock_datetime.utcnow.return_value = datetime(2023, 10, 8)
+    mock_datetime.side_effect = lambda *args, **kw: datetime(*args, **kw)
+    mock_datetime.date.side_effect = lambda *args, **kw: date(*args, **kw)
+
+    mock_api_client = AsyncMock()
+
+    # Mock return values for all API methods
+    mock_api_client.get_daily_rewards.return_value = {
+        "btc": {"daily_rewards": [{"total_reward": "0.123"}]}
+    }
+    mock_api_client.get_account_stats.return_value = (
+        {}
+    )  # No longer used for balance/reward
+    mock_api_client.get_user_profile.return_value = {
+        "btc": {"current_balance": 4.56, "all_time_reward": 7.89, "ok_workers": 10}
+    }
+    mock_api_client.get_daily_hashrate.return_value = {"test": "daily_hashrate_data"}
+    mock_api_client.get_block_rewards.return_value = {"test": "block_rewards_data"}
+    mock_api_client.get_workers.return_value = {"test": "workers_data"}
+    mock_api_client.get_payouts.return_value = {"test": "payouts_data"}
+
+    coordinator = BraiinsDataUpdateCoordinator(
+        hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
+    )
+    await coordinator.async_refresh()
+
+    # Assert that all API client methods were called exactly once with expected arguments
     mock_api_client.get_daily_rewards.assert_called_once()
-    assert coordinator.data["current_balance"] == 1.23
+    mock_api_client.get_account_stats.assert_called_once()  # Still called, but data not used
+    mock_api_client.get_user_profile.assert_called_once()
+    mock_api_client.get_daily_hashrate.assert_called_once()
+
+    expected_from_date = (date(2023, 10, 8) - timedelta(days=7)).strftime("%Y-%m-%d")
+    expected_to_date = date(2023, 10, 8).strftime("%Y-%m-%d")
+
+    mock_api_client.get_block_rewards.assert_called_once_with(
+        expected_from_date, expected_to_date
+    )
+    mock_api_client.get_workers.assert_called_once()
+    mock_api_client.get_payouts.assert_called_once_with(
+        expected_from_date, expected_to_date
+    )
+
+    # Assert that processed_data contains the expected values
     assert coordinator.data["today_reward"] == 0.123
+    assert coordinator.data["current_balance"] == 4.56
+    assert coordinator.data["all_time_reward"] == 7.89
+    assert coordinator.data["ok_workers"] == 10
+    # Assert the presence of raw data from new endpoints
+    assert "user_profile_data" in coordinator.data
+    assert "daily_hashrate_data" in coordinator.data
+    assert "block_rewards_data" in coordinator.data
+    assert "workers_data" in coordinator.data
+    assert "payouts_data" in coordinator.data
 
 
 @pytest.mark.asyncio
@@ -45,11 +104,10 @@ async def test_update_failed_api_error(hass):
     coordinator = BraiinsDataUpdateCoordinator(
         hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
     )
-    with pytest.raises(UpdateFailed): # Change expected exception to UpdateFailed
+    with pytest.raises(UpdateFailed):  # Change expected exception to UpdateFailed
         await coordinator.async_refresh()
 
     mock_api_client.get_account_stats.assert_called_once()
-    mock_api_client.get_daily_rewards.assert_not_called()  # Assuming stats fetch fails first
 
 
 @pytest.mark.asyncio
@@ -65,11 +123,10 @@ async def test_update_failed_parsing_error(hass):
     coordinator = BraiinsDataUpdateCoordinator(
         hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
     )
-    with pytest.raises(UpdateFailed): # Change expected exception to UpdateFailed
+    with pytest.raises(UpdateFailed):  # Change expected exception to UpdateFailed
         await coordinator.async_refresh()
 
     mock_api_client.get_account_stats.assert_called_once()
-    mock_api_client.get_daily_rewards.assert_not_called()  # Assuming stats fetch fails first
 
 
 @pytest.mark.asyncio
@@ -86,8 +143,33 @@ async def test_update_failed_daily_rewards_parsing_error(hass):
         hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
     )
 
-    with pytest.raises(UpdateFailed): # Change expected exception to UpdateFailed
+    with pytest.raises(UpdateFailed):  # Change expected exception to UpdateFailed
         await coordinator.async_refresh()
 
     mock_api_client.get_account_stats.assert_called_once()
     mock_api_client.get_daily_rewards.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_update_failed_missing_new_data_keys(hass):
+    "Test data update failure due to missing keys in new data."
+    mock_api_client = AsyncMock()
+
+    # Mock data with missing keys from a new endpoint (e.g., user profile)
+    mock_api_client.get_daily_rewards.return_value = {
+        "btc": {"daily_rewards": [{"total_reward": "0.123"}]}
+    }
+    mock_api_client.get_account_stats.return_value = {}
+    mock_api_client.get_user_profile.return_value = {
+        "btc": {"current_balance": 4.56}
+    }  # Missing 'all_time_reward' and 'ok_workers'
+    mock_api_client.get_daily_hashrate.return_value = {"test": "daily_hashrate_data"}
+    mock_api_client.get_block_rewards.return_value = {"test": "block_rewards_data"}
+    mock_api_client.get_workers.return_value = {"test": "workers_data"}
+    mock_api_client.get_payouts.return_value = {"test": "payouts_data"}
+
+    coordinator = BraiinsDataUpdateCoordinator(
+        hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
+    )
+    with pytest.raises(UpdateFailed):
+        await coordinator.async_refresh()

@@ -8,7 +8,7 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.const import CURRENCY_BITCOIN
+from homeassistant.const import CURRENCY_BITCOIN, UnitOfDataRate
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
@@ -40,6 +40,20 @@ SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
         native_unit_of_measurement=CURRENCY_BITCOIN,
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.MONETARY,
+    ),
+    SensorEntityDescription(
+        key="pool_5m_hash_rate",
+        name="Braiins Pool 5m Hash Rate",
+        icon="mdi:gauge",
+        native_unit_of_measurement="Gh/s",  # API specifies Gh/s
+        state_class=SensorStateClass.MEASUREMENT,
+        device_class=SensorDeviceClass.DATA_RATE,
+    ),
+    SensorEntityDescription(
+        key="ok_workers",
+        name="Braiins Pool Active Workers",
+        icon="mdi:worker",
+        state_class=SensorStateClass.MEASUREMENT,
     ),
 )
 

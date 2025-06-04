@@ -8,7 +8,7 @@ import aiohttp
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 from .const import (
     DOMAIN,
@@ -44,6 +44,7 @@ class BraiinsDataUpdateCoordinator(DataUpdateCoordinator[dict]):
         """Fetch data from the API."""
         _LOGGER.debug("Fetching and processing data for Braiins Pool integration.")
         processed_data = {}
+        today = datetime.utcnow().date()
 
         try:
             daily_rewards_data = await self.api_client.get_daily_rewards()
@@ -61,27 +62,29 @@ class BraiinsDataUpdateCoordinator(DataUpdateCoordinator[dict]):
                 )
                 processed_data["today_reward"] = 0.0
 
-            # Fetch overall stats - assuming this endpoint provides current_balance and all_time_reward
-            data = await self.api_client.get_account_stats()
+            user_profile_data = await self.api_client.get_user_profile()
+            processed_data["user_profile_data"] = user_profile_data
 
-            # Assume 'current_balance' and 'all_time_reward' are at the top level for now
-            for key in ["current_balance", "all_time_reward"]:
-                value = data.get(key)
-                if value is not None:
-                    try:
-                        processed_data[key] = float(
-                            str(value)
-                        )  # Convert to string first just in case
-                    except ValueError:
-                        _LOGGER.warning(
-                            "Could not convert %s '%s' to float. Keeping as string.",
-                            key,
-                            value,
-                        )
-                        processed_data[key] = value
-                else:
-                    processed_data[key] = value
-            # Note: The data structure for current_balance and all_time_reward needs verification from the other endpoint
+            daily_hashrate_data = await self.api_client.get_daily_hashrate()
+            processed_data["daily_hashrate_data"] = daily_hashrate_data
+
+            # Placeholder dates for now, will refine later
+            # Fetch block rewards for the last 7 days
+            block_rewards_data = await self.api_client.get_block_rewards(
+                (today - timedelta(days=7)).strftime("%Y-%m-%d"),
+                today.strftime("%Y-%m-%d"),
+            )
+            processed_data["block_rewards_data"] = block_rewards_data
+
+            workers_data = await self.api_client.get_workers()
+            processed_data["workers_data"] = workers_data
+
+            # Placeholder dates for now, will refine later
+            payouts_data = await self.api_client.get_payouts(
+                (today - timedelta(days=7)).strftime("%Y-%m-%d"),
+                today.strftime("%Y-%m-%d"),
+            )
+            processed_data["payouts_data"] = payouts_data
 
             return processed_data
         except Exception as err:  # Catch any exception during fetching or processing

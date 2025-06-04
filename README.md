@@ -1,6 +1,6 @@
 ## Braiins Pool Home Assistant Integration
 
-Monitor your Braiins Pool mining rewards and account statistics directly within Home Assistant. This integration allows you to track your daily rewards, current balance, and potentially other metrics exposed by the Braiins Pool API.
+Monitor your Braiins Pool mining statistics, account data, and worker performance directly within Home Assistant. This integration fetches a variety of data points from the Braiins Pool API to provide insights into your mining operations.
 
 ### Installation
 
@@ -25,9 +25,11 @@ This integration is available through HACS (Home Assistant Community Store).
 
 This integration will create sensors for:
 
-*   Daily Mining Reward
-*   Current Account Balance (BTC)
-*   Total Paid Reward (BTC)
+*   `today_reward`: Braiins Pool Today's Reward
+*   `current_balance`: Braiins Pool Current Balance
+*   `all_time_reward`: Braiins Pool All Time Reward
+*   `pool_5m_hash_rate`: Braiins Pool 5m Hash Rate
+*   `ok_workers`: Braiins Pool Active Workers
 
 ### Disclaimer
 

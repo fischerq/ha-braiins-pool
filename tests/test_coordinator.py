@@ -22,13 +22,13 @@ async def test_successful_update(hass):
     coordinator = BraiinsDataUpdateCoordinator(
         hass, mock_api_client, DEFAULT_SCAN_INTERVAL
     )
-        await coordinator.async_refresh()
+    await coordinator.async_refresh()
 
-        mock_api_client.get_account_stats.assert_called_once()
-        mock_api_client.get_daily_rewards.assert_called_once()
-        assert coordinator.data is not None
-        assert coordinator.data["current_balance"] == 1.23
-        assert coordinator.data["today_reward"] == 0.123
+    mock_api_client.get_account_stats.assert_called_once()
+    mock_api_client.get_daily_rewards.assert_called_once()
+    assert coordinator.data is not None
+    assert coordinator.data["current_balance"] == 1.23
+    assert coordinator.data["today_reward"] == 0.123
 
 
 @pytest.mark.asyncio
@@ -43,11 +43,12 @@ async def test_update_failed_api_error(hass):
 
     coordinator = BraiinsDataUpdateCoordinator(
         hass, mock_api_client, DEFAULT_SCAN_INTERVAL
-    )        with pytest.raises(UpdateFailed):
-            await coordinator.async_refresh()
+    )
+    with pytest.raises(UpdateFailed):
+        await coordinator.async_refresh()
 
-        mock_api_client.get_account_stats.assert_called_once()
-        mock_api_client.get_daily_rewards.assert_not_called()  # Assuming stats fetch fails first
+    mock_api_client.get_account_stats.assert_called_once()
+    mock_api_client.get_daily_rewards.assert_not_called()  # Assuming stats fetch fails first
 
 
 @pytest.mark.asyncio
@@ -63,11 +64,11 @@ async def test_update_failed_parsing_error(hass):
     coordinator = BraiinsDataUpdateCoordinator(
         hass, mock_api_client, DEFAULT_SCAN_INTERVAL
     )
-        with pytest.raises(UpdateFailed):
-            await coordinator.async_refresh()
+    with pytest.raises(UpdateFailed):
+        await coordinator.async_refresh()
 
-        mock_api_client.get_account_stats.assert_called_once()
-        mock_api_client.get_daily_rewards.assert_not_called()  # Assuming stats fetch fails first
+    mock_api_client.get_account_stats.assert_called_once()
+    mock_api_client.get_daily_rewards.assert_not_called()  # Assuming stats fetch fails first
 
 
 @pytest.mark.asyncio
@@ -84,8 +85,8 @@ async def test_update_failed_daily_rewards_parsing_error(hass):
         hass, mock_api_client, DEFAULT_SCAN_INTERVAL
     )
 
-        with pytest.raises(UpdateFailed):
-            await coordinator.async_refresh()
+    with pytest.raises(UpdateFailed):
+        await coordinator.async_refresh()
 
-        mock_api_client.get_account_stats.assert_called_once()
-        mock_api_client.get_daily_rewards.assert_called_once()
+    mock_api_client.get_account_stats.assert_called_once()
+    mock_api_client.get_daily_rewards.assert_called_once()

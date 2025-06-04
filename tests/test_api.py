@@ -60,7 +60,7 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
         self.mock_session.get.return_value.__aenter__.return_value = (
             await self.mock_response(status=401)
         )
- 
+
         with self.assertRaises(ClientError):
             await self.api_client.get_account_stats()
 
@@ -77,7 +77,7 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
         self.mock_session.get.return_value.__aenter__.return_value = (
             await self.mock_response(status=500)
         )
- 
+
         with self.assertRaises(ClientError):
             await self.api_client.get_account_stats()
 
@@ -114,7 +114,7 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
         self.mock_session.get.return_value.__aenter__.return_value = (
             await self.mock_response(status=401)
         )
- 
+
         with self.assertRaises(ClientError):
             await self.api_client.get_daily_rewards()
 
@@ -133,7 +133,7 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
         self.mock_session.get.return_value.__aenter__.return_value = (
             await self.mock_response(json_data=mock_data)
         )
- 
+
         with self.assertRaises(KeyError):
             await self.api_client.get_daily_rewards()
 
@@ -152,7 +152,7 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
         self.mock_session.get.return_value.__aenter__.return_value = (
             await self.mock_response(json_data=mock_data)
         )
- 
+
         with self.assertRaises(IndexError):
             await self.api_client.get_daily_rewards()
 
@@ -176,7 +176,7 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
             ContentTypeError(MagicMock(), MagicMock())
         )
 
- with self.assertRaises(ContentTypeError):
+        with self.assertRaises(ContentTypeError):
             await self.api_client.get_daily_rewards()
 
         self.mock_session.get.assert_awaited_once_with(
@@ -190,7 +190,7 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
         expected_url = "https://pool.braiins.com/accounts/rewards/json/btc"
         self.mock_session.get.side_effect = ClientError("Network issue")
 
- with self.assertRaises(ClientError):
+        with self.assertRaises(ClientError):
             await self.api_client.get_daily_rewards()
 
         self.mock_session.get.assert_awaited_once_with(

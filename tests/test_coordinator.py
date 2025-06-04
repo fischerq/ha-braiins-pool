@@ -3,8 +3,8 @@
 import pytest
 from unittest.mock import AsyncMock, patch
 
-from custom_components.braiins_pool.const import DEFAULT_SCAN_INTERVAL
 from custom_components.braiins_pool.coordinator import BraiinsDataUpdateCoordinator
+from custom_components.braiins_pool.const import DEFAULT_SCAN_INTERVAL
 from homeassistant.helpers.update_coordinator import UpdateFailed
 
 pytestmark = pytest.mark.asyncio  # This line should come after imports
@@ -19,10 +19,9 @@ async def test_successful_update(hass):
         "btc": {"daily_rewards": [{"total_reward": "0.123"}]}
     }
 
-    with patch(
-        "custom_components.braiins_pool.coordinator.DEFAULT_SCAN_INTERVAL", 60
-    ), patch("custom_components.braiins_pool.const.DEFAULT_SCAN_INTERVAL", 60):
-
+    coordinator = BraiinsDataUpdateCoordinator(
+        hass, mock_api_client, DEFAULT_SCAN_INTERVAL
+    )
         await coordinator.async_refresh()
 
         mock_api_client.get_account_stats.assert_called_once()
@@ -42,10 +41,9 @@ async def test_update_failed_api_error(hass):
         "btc": {"daily_rewards": [{"total_reward": "0.123"}]}
     }
 
-    with patch(
-        "custom_components.braiins_pool.coordinator.DEFAULT_SCAN_INTERVAL", 60
-    ), patch("custom_components.braiins_pool.const.DEFAULT_SCAN_INTERVAL", 60):
-        with pytest.raises(UpdateFailed):
+    coordinator = BraiinsDataUpdateCoordinator(
+        hass, mock_api_client, DEFAULT_SCAN_INTERVAL
+    )        with pytest.raises(UpdateFailed):
             await coordinator.async_refresh()
 
         mock_api_client.get_account_stats.assert_called_once()
@@ -62,10 +60,9 @@ async def test_update_failed_parsing_error(hass):
         "btc": {"daily_rewards": [{"total_reward": "0.123"}]}
     }
 
-    with patch(
-        "custom_components.braiins_pool.coordinator.DEFAULT_SCAN_INTERVAL", 60
-    ), patch("custom_components.braiins_pool.const.DEFAULT_SCAN_INTERVAL", 60):
-
+    coordinator = BraiinsDataUpdateCoordinator(
+        hass, mock_api_client, DEFAULT_SCAN_INTERVAL
+    )
         with pytest.raises(UpdateFailed):
             await coordinator.async_refresh()
 
@@ -83,8 +80,9 @@ async def test_update_failed_daily_rewards_parsing_error(hass):
         "btc": {}
     }  # Missing daily_rewards key
 
-    with patch("custom_components.braiins_pool.coordinator.DEFAULT_SCAN_INTERVAL", 60):
-        coordinator = BraiinsDataUpdateCoordinator(hass, mock_api_client, 60)
+    coordinator = BraiinsDataUpdateCoordinator(
+        hass, mock_api_client, DEFAULT_SCAN_INTERVAL
+    )
 
         with pytest.raises(UpdateFailed):
             await coordinator.async_refresh()

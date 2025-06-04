@@ -7,9 +7,11 @@ from custom_components.braiins_pool.const import DEFAULT_SCAN_INTERVAL
 from custom_components.braiins_pool.coordinator import BraiinsDataUpdateCoordinator
 from homeassistant.helpers.update_coordinator import UpdateFailed
 
-pytestmark = pytest.mark.asyncio # This line should come after imports
+pytestmark = pytest.mark.asyncio  # This line should come after imports
+
+@pytest.mark.asyncio
 async def test_successful_update(hass):
-    """Test successful data update."""
+    "Test successful data update."
     mock_api_client = AsyncMock()
     mock_api_client.get_account_stats.return_value = {"current_balance": 1.23}
     mock_api_client.get_daily_rewards.return_value = {
@@ -17,7 +19,7 @@ async def test_successful_update(hass):
     }
 
     with patch("custom_components.braiins_pool.coordinator.DEFAULT_SCAN_INTERVAL", 60):
-        coordinator = BraiinsDataUpdateCoordinator(hass, mock_api_client, 60)
+ with patch("custom_components.braiins_pool.const.DEFAULT_SCAN_INTERVAL", 60):
 
         await coordinator.async_refresh()
 
@@ -28,16 +30,18 @@ async def test_successful_update(hass):
         assert coordinator.data["today_reward"] == 0.123
 
 
+@pytest.mark.asyncio
 async def test_update_failed_api_error(hass):
-    """Test data update failure due to API error."""
+    "Test data update failure due to API error."
     mock_api_client = AsyncMock()
+
     mock_api_client.get_account_stats.side_effect = Exception("API Error")
     mock_api_client.get_daily_rewards.return_value = {
         "btc": {"daily_rewards": [{"total_reward": "0.123"}]}
     }
 
     with patch("custom_components.braiins_pool.coordinator.DEFAULT_SCAN_INTERVAL", 60):
-        coordinator = BraiinsDataUpdateCoordinator(hass, mock_api_client, 60)
+ with patch("custom_components.braiins_pool.const.DEFAULT_SCAN_INTERVAL", 60):
 
         with pytest.raises(UpdateFailed):
             await coordinator.async_refresh()
@@ -46,16 +50,18 @@ async def test_update_failed_api_error(hass):
         mock_api_client.get_daily_rewards.assert_not_called()  # Assuming stats fetch fails first
 
 
+@pytest.mark.asyncio
 async def test_update_failed_parsing_error(hass):
-    """Test data update failure due to parsing error."""
+    "Test data update failure due to parsing error."
     mock_api_client = AsyncMock()
+
     mock_api_client.get_account_stats.return_value = {}  # Missing expected key
     mock_api_client.get_daily_rewards.return_value = {
         "btc": {"daily_rewards": [{"total_reward": "0.123"}]}
     }
 
     with patch("custom_components.braiins_pool.coordinator.DEFAULT_SCAN_INTERVAL", 60):
-        coordinator = BraiinsDataUpdateCoordinator(hass, mock_api_client, 60)
+ with patch("custom_components.braiins_pool.const.DEFAULT_SCAN_INTERVAL", 60):
 
         with pytest.raises(UpdateFailed):
             await coordinator.async_refresh()
@@ -64,9 +70,11 @@ async def test_update_failed_parsing_error(hass):
         mock_api_client.get_daily_rewards.assert_not_called()  # Assuming stats fetch fails first
 
 
+@pytest.mark.asyncio
 async def test_update_failed_daily_rewards_parsing_error(hass):
-    """Test data update failure due to daily rewards parsing error."""
+    "Test data update failure due to daily rewards parsing error."
     mock_api_client = AsyncMock()
+
     mock_api_client.get_account_stats.return_value = {"current_balance": 1.23}
     mock_api_client.get_daily_rewards.return_value = {
         "btc": {}

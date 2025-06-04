@@ -1,11 +1,12 @@
 import asyncio
 import unittest
-from unittest.mock import AsyncMock, MagicMock, call, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from aiohttp import ClientError
 from aiohttp.client_exceptions import ContentTypeError
 
 from custom_components.braiins_pool.api import BraiinsPoolApiClient
+import pytest
 
 
 
@@ -33,6 +34,7 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
             )
 
         # Mock __aenter__ and __aexit__ for async context manager
+pytestmark = pytest.mark.asyncio
         return mock_resp
 
     @patch("custom_components.braiins_pool.api._LOGGER")

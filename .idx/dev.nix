@@ -6,8 +6,11 @@
   # Use https://search.nixos.org/packages to find packages
   packages = [
     # pkgs.go
-    # pkgs.python311
+    pkgs.python311
     pkgs.python311Packages.black
+    pkgs.python311Packages.pytest
+    pkgs.python311Packages.aiohttp
+    pkgs.python311Packages.homeassistant
     # pkgs.nodejs_20
     # pkgs.nodePackages.nodemon
   ];

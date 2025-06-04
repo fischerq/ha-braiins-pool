@@ -26,7 +26,6 @@ async def test_successful_update(hass):
     )
     await coordinator.async_refresh()
 
-    mock_api_client.get_account_stats.assert_called_once()
     mock_api_client.get_daily_rewards.assert_called_once()  # Keep this assertion for now, will refine later
 
 
@@ -63,7 +62,6 @@ async def test_successful_update_with_new_data(mock_datetime, hass):
 
     # Assert that all API client methods were called exactly once with expected arguments
     mock_api_client.get_daily_rewards.assert_called_once()
-    mock_api_client.get_account_stats.assert_called_once()  # Still called, but data not used
     mock_api_client.get_user_profile.assert_called_once()
     mock_api_client.get_daily_hashrate.assert_called_once()
 
@@ -108,8 +106,6 @@ async def test_update_failed_api_error(hass):
         await coordinator.async_refresh()
 
     mock_api_client.get_account_stats.assert_called_once()
-
-
 @pytest.mark.asyncio
 async def test_update_failed_parsing_error(hass):
     "Test data update failure due to parsing error."

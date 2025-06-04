@@ -46,6 +46,7 @@ class BraiinsDataUpdateCoordinator(DataUpdateCoordinator[dict]):
         processed_data = {}
         today = datetime.utcnow().date()
 
+        # Fetch data from all APIs first
         try:
             daily_rewards_data = await self.api_client.get_daily_rewards()
             today_reward_str = (
@@ -63,29 +64,35 @@ class BraiinsDataUpdateCoordinator(DataUpdateCoordinator[dict]):
                 processed_data["today_reward"] = 0.0
 
             user_profile_data = await self.api_client.get_user_profile()
-            processed_data["user_profile_data"] = user_profile_data
-
             daily_hashrate_data = await self.api_client.get_daily_hashrate()
-            processed_data["daily_hashrate_data"] = daily_hashrate_data
 
-            # Placeholder dates for now, will refine later
-            # Fetch block rewards for the last 7 days
-            block_rewards_data = await self.api_client.get_block_rewards(
-                (today - timedelta(days=7)).strftime("%Y-%m-%d"),
-                today.strftime("%Y-%m-%d"),
+            # Fetch block rewards and payouts for the last 7 days
+            from_date = (today - timedelta(days=7)).strftime("%Y-%m-%d")
+            to_date = today.strftime("%Y-%m-%d")
+
+            payouts_data = await self.api_client.get_payouts(
+ from_date, to_date
             )
             processed_data["block_rewards_data"] = block_rewards_data
 
             workers_data = await self.api_client.get_workers()
             processed_data["workers_data"] = workers_data
 
+            # Process data from fetched endpoints
+            processed_data["user_profile_data"] = user_profile_data # Keep raw data as well
+            processed_data["daily_hashrate_data"] = daily_hashrate_data # Keep raw data as well
+            processed_data["block_rewards_data"] = block_rewards_data # Keep raw data as well
+            processed_data["payouts_data"] = payouts_data # Keep raw data as well
+
+            # Extract and process specific data points
+            processed_data["current_balance"] = float(user_profile_data.get("btc", {}).get("current_balance", 0.0))
+            processed_data["all_time_reward"] = float(user_profile_data.get("btc", {}).get("all_time_reward", 0.0))
+            processed_data["pool_5m_hash_rate"] = float(daily_hashrate_data.get("btc", {}).get("pool_5m_hash_rate", 0.0))
+            processed_data["ok_workers"] = int(user_profile_data.get("btc", {}).get("ok_workers", 0))
+
             # Placeholder dates for now, will refine later
             payouts_data = await self.api_client.get_payouts(
                 (today - timedelta(days=7)).strftime("%Y-%m-%d"),
-                today.strftime("%Y-%m-%d"),
-            )
-            processed_data["payouts_data"] = payouts_data
-
             return processed_data
         except Exception as err:  # Catch any exception during fetching or processing
             _LOGGER.error(

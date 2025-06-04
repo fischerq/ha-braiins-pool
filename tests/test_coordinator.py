@@ -6,9 +6,8 @@ import pytest
 from homeassistant.helpers.update_coordinator import UpdateFailed
 from custom_components.braiins_pool.coordinator import BraiinsDataUpdateCoordinator
 
-pytestmark = pytest.mark.asyncio
-
-
+from custom_components.braiins_pool.const import DEFAULT_SCAN_INTERVAL
+pytestmark = pytest.mark.asyncio # This line should come after imports
 async def test_successful_update(hass):
     """Test successful data update."""
     mock_api_client = AsyncMock()

@@ -6,7 +6,7 @@ from aiohttp import ClientError
 from aiohttp.client_exceptions import ContentTypeError
 
 from custom_components.braiins_pool.api import BraiinsPoolApiClient
-from custom_components.braiins_pool.const import BRAIINS_API_URL
+
 
 
 class TestBraiinsPoolApiClient(unittest.TestCase):
@@ -46,7 +46,7 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
         data = await self.api_client.get_account_stats()
 
         self.mock_session.get.assert_awaited_once_with(
-            BRAIINS_API_URL, headers={"Pool-Auth-Token": self.api_key}
+            "https://pool.braiins.com/stats/json/btc/", headers={"Pool-Auth-Token": self.api_key}
         )
         self.assertEqual(data, mock_data)  # Assert data matches mock_data
         mock_logger.debug.assert_called()  # Check if debug logging was called
@@ -62,7 +62,7 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
             await self.api_client.get_account_stats()
 
         self.mock_session.get.assert_awaited_once_with(
-            BRAIINS_API_URL, headers={"Pool-Auth-Token": self.api_key}
+            "https://pool.braiins.com/stats/json/btc/", headers={"Pool-Auth-Auth-Token": self.api_key}
         )  # Assert URL and headers
         self.mock_session.get.return_value.__aenter__.return_value.raise_for_status.assert_called_once()  # Assert raise_for_status was called
         mock_logger.error.assert_called()  # Check if error logging was called for 401
@@ -78,7 +78,7 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
             await self.api_client.get_account_stats()
 
         self.mock_session.get.assert_awaited_once_with(
-            BRAIINS_API_URL, headers={"Pool-Auth-Token": self.api_key}
+            "https://pool.braiins.com/stats/json/btc/", headers={"Pool-Auth-Auth-Token": self.api_key}
         )  # Assert URL and headers
         self.mock_session.get.return_value.__aenter__.return_value.raise_for_status.assert_called_once()  # Assert raise_for_status was called
         mock_logger.error.assert_called()  # Check if error logging was called for 500

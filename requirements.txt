@@ -1,3 +1,4 @@
 pytest
 aiohttp
-unittest-mock
+mock
+pytest-asyncio

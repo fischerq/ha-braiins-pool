@@ -97,8 +97,6 @@ async def test_update_failed_api_error(hass):
 
     # Cause an API error by having one of the API calls raise a ClientError
     mock_api_client.get_daily_rewards.side_effect = ClientError("API Error")
-        "btc": {"daily_rewards": [{"total_reward": "0.123"}]}
-    }
 
     coordinator = BraiinsDataUpdateCoordinator(
         hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)

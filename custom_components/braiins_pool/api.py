@@ -3,7 +3,10 @@
 import logging
 import aiohttp
 
-from .const import BRAIINS_API_URL, API_HEADERS, CONF_API_KEY
+from .const import API_HEADERS, CONF_API_KEY
+
+BRAIINS_API_URL = "https://pool.braiins.com/stats/json/btc/"
+BRAIINS_DAILY_REWARDS_URL = "https://pool.braiins.com/stats/json/btc/rewards/"
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -65,7 +68,7 @@ class BraiinsPoolApiClient:
     async def get_daily_rewards(self):
         """Fetch daily rewards from Braiins Pool API."""
         # Assuming this is the correct and full URL for daily rewards
-        daily_rewards_url = "https://pool.braiins.com/accounts/rewards/json/btc"
+        daily_rewards_url = BRAIINS_DAILY_REWARDS_URL
         try:
             data = await self._request(daily_rewards_url)
             # Parse the total_reward from the provided structure

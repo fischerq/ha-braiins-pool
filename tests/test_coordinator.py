@@ -1,6 +1,7 @@
 """Unit tests for the Braiins Pool coordinator."""
 
 import pytest
+from datetime import timedelta
 from unittest.mock import AsyncMock, patch
 
 from custom_components.braiins_pool.coordinator import BraiinsDataUpdateCoordinator
@@ -20,7 +21,7 @@ async def test_successful_update(hass):
     }
 
     coordinator = BraiinsDataUpdateCoordinator(
-        hass, mock_api_client, DEFAULT_SCAN_INTERVAL
+        hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
     )
     await coordinator.async_refresh()
 
@@ -42,7 +43,7 @@ async def test_update_failed_api_error(hass):
     }
 
     coordinator = BraiinsDataUpdateCoordinator(
-        hass, mock_api_client, DEFAULT_SCAN_INTERVAL
+        hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
     )
     with pytest.raises(UpdateFailed):
         await coordinator.async_refresh()
@@ -62,7 +63,7 @@ async def test_update_failed_parsing_error(hass):
     }
 
     coordinator = BraiinsDataUpdateCoordinator(
-        hass, mock_api_client, DEFAULT_SCAN_INTERVAL
+        hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
     )
     with pytest.raises(UpdateFailed):
         await coordinator.async_refresh()

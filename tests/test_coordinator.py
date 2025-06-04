@@ -1,12 +1,12 @@
 """Unit tests for the Braiins Pool coordinator."""
 
-from unittest.mock import AsyncMock, patch
 import pytest
-
-from homeassistant.helpers.update_coordinator import UpdateFailed
-from custom_components.braiins_pool.coordinator import BraiinsDataUpdateCoordinator
+from unittest.mock import AsyncMock, patch
 
 from custom_components.braiins_pool.const import DEFAULT_SCAN_INTERVAL
+from custom_components.braiins_pool.coordinator import BraiinsDataUpdateCoordinator
+from homeassistant.helpers.update_coordinator import UpdateFailed
+
 pytestmark = pytest.mark.asyncio # This line should come after imports
 async def test_successful_update(hass):
     """Test successful data update."""

@@ -2,31 +2,25 @@
 
 import asyncio
 import logging
-from datetime import timedelta
-
-from homeassistant.core import HomeAssistant
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.helpers.update_coordinator import (
-    DataUpdateCoordinator,
-    UpdateFailed,
-)
-
-from .const import (
-    DOMAIN,
-    BRAIINS_API_URL,
-    API_HEADERS,
-    CONF_API_KEY,
-    BRAIINS_DAILY_REWARDS_URL,
-)
 
 import aiohttp
 
+from homeassistant.core import HomeAssistant
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from datetime import timedelta
+
+from .const import (
+    DOMAIN,
+    API_HEADERS,
+    CONF_API_KEY,
+)
+
 _LOGGER = logging.getLogger(__name__)
 
+from .api import BraiinsPoolApiClient
 
-from .api import BraiinsPoolApiClient  # Import the actual API client
-
-
+# Import the actual API client
 class BraiinsDataUpdateCoordinator(DataUpdateCoordinator[dict]):
     """Coordinate updates from the Braiins Pool API."""
 

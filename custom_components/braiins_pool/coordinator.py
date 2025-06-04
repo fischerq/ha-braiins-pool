@@ -24,49 +24,6 @@ import aiohttp
 _LOGGER = logging.getLogger(__name__)
 
 
-# Placeholder for the API client class
-# In a real integration, this would be in api.py or defined here if simple
-class BraiinsPoolAPI:
-    """Placeholder API client for Braiins Pool."""
-
-    def __init__(self, hass: HomeAssistant, api_key: str):
-        """Initialize the API client."""
-        self._hass = hass
-        self._api_key = api_key
-        _LOGGER.debug("BraiinsPoolAPI initialized with key: %s", api_key)
-
-    async def async_get_data(self) -> dict:
-        """Fetch data from the Braiins Pool API."""
-        _LOGGER.debug("Fetching data from Braiins Pool API...")
-        session = async_get_clientsession(self._hass)
-        headers = {
-            key: value.format(self._api_key) for key, value in API_HEADERS.items()
-        }
-
-        try:
-            # Use a timeout for the request
-            async with session.get(BRAIINS_API_URL, headers=headers) as response:
-                if response.status == 401:
-                    _LOGGER.error(
-                        "Braiins Pool API key is invalid. Please check your configuration."
-                    )
-                    raise UpdateFailed("Invalid API key")
-                response.raise_for_status()  # Raise an HTTPError for bad responses (4xx or 5xx) other than 401
-                json_data = await response.json()
-
-            # Basic validation/parsing - adapt based on actual API response structure
-            if not isinstance(json_data, dict):
-                _LOGGER.error(
-                    "Unexpected data format from Braiins Pool API: %s", json_data
-                )
-                raise UpdateFailed("Unexpected data format from API")
-
-            return json_data
-        except Exception as err:
-            _LOGGER.error("Error fetching data from Braiins Pool API: %s", err)
-            raise UpdateFailed(f"Error communicating with API: {err}") from err
-
-
 from .api import BraiinsPoolApiClient  # Import the actual API client
 
 

@@ -110,7 +110,7 @@ async def test_update_failed_parsing_error(hass):
     "Test data update failure due to parsing error."
     mock_api_client = AsyncMock()
 
-    mock_api_client.get_user_profile.return_value = {"btc": {}}  # Missing expected keys for user profile
+    mock_api_client.get_user_profile.return_value = {}  # Missing expected keys for user profile
     mock_api_client.get_daily_rewards.return_value = {
         "btc": {"daily_rewards": [{"total_reward": "0.123"}]}
     }
@@ -136,8 +136,7 @@ async def test_update_failed_daily_rewards_parsing_error(hass):
     "Test data update failure due to daily rewards parsing error."
     mock_api_client = AsyncMock()
 
-    mock_api_client.get_daily_rewards.return_value = {"btc": {"daily_rewards": [{}]}
-    }  # Missing daily_rewards key
+    mock_api_client.get_daily_rewards.return_value = {"btc": {"daily_rewards": [{}]}}  # Missing daily_rewards key
 
     coordinator = BraiinsDataUpdateCoordinator(
         hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)

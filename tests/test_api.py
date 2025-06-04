@@ -30,6 +30,7 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
         if status >= 400:
             mock_resp.raise_for_status.side_effect = ClientError(
                 f"Mock HTTP error {status}"
+            )
         pytestmark = pytest.mark.asyncio  # This line should come after imports
 
         # Mock __aenter__ and __aexit__ for async context manager

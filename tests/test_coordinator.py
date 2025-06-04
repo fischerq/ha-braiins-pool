@@ -21,7 +21,7 @@ async def test_successful_update(hass):
         "btc": {"daily_rewards": [{"total_reward": "0.123"}]}
     }
 
-    coordinator = BraiinsDataUpdateCoordinator (
+    coordinator = BraiinsDataUpdateCoordinator(
         hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
     )
     await coordinator.async_refresh()
@@ -42,9 +42,9 @@ async def test_update_failed_api_error(hass):
         "btc": {"daily_rewards": [{"total_reward": "0.123"}]}
     }
 
-    coordinator = BraiinsDataUpdateCoordinator (
+    coordinator = BraiinsDataUpdateCoordinator(
         hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
-    )    
+    )
     with pytest.raises(UpdateFailed):
         await coordinator.async_refresh()
 
@@ -62,7 +62,7 @@ async def test_update_failed_parsing_error(hass):
         "btc": {"daily_rewards": [{"total_reward": "0.123"}]}
     }
 
-    coordinator = BraiinsDataUpdateCoordinator (
+    coordinator = BraiinsDataUpdateCoordinator(
         hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
     )
     with pytest.raises(UpdateFailed):

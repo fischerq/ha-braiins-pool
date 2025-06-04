@@ -45,7 +45,7 @@ async def test_update_failed_api_error(hass):
     coordinator = BraiinsDataUpdateCoordinator(
         hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
     )
-    with pytest.raises(UpdateFailed):
+    with pytest.raises(UpdateFailed): # Change expected exception to UpdateFailed
         await coordinator.async_refresh()
 
     mock_api_client.get_account_stats.assert_called_once()
@@ -65,7 +65,7 @@ async def test_update_failed_parsing_error(hass):
     coordinator = BraiinsDataUpdateCoordinator(
         hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
     )
-    with pytest.raises(UpdateFailed):
+    with pytest.raises(UpdateFailed): # Change expected exception to UpdateFailed
         await coordinator.async_refresh()
 
     mock_api_client.get_account_stats.assert_called_once()
@@ -86,7 +86,7 @@ async def test_update_failed_daily_rewards_parsing_error(hass):
         hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
     )
 
-    with pytest.raises(UpdateFailed):
+    with pytest.raises(UpdateFailed): # Change expected exception to UpdateFailed
         await coordinator.async_refresh()
 
     mock_api_client.get_account_stats.assert_called_once()

@@ -22,7 +22,7 @@ jobs:
         ls .
         echo "Running cat requirements.txt"
         cat requirements.txt
-        pip install -r requirements.txt || echo "requirements.txt not found, skipping dependency installation via file"
+        pip install -r requirements.txt
 
     - name: Run tests
       run: ./run_tests.sh

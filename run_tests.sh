@@ -5,4 +5,4 @@
 # Remember to activate your Python virtual environment if you are using one:
 # source venv/bin/activate
 
-pytest tests
+pytest tests/

@@ -2,7 +2,12 @@
 
 import logging
 
-from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorEntityDescription, SensorStateClass
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorEntityDescription,
+    SensorStateClass,
+)
 from homeassistant.const import CURRENCY_BITCOIN
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 

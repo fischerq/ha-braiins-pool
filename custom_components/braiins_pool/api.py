@@ -66,11 +66,14 @@ class BraiinsPoolApiClient:
                 f"API error {response.status}: {await response.text()}"
             ) from err
         except aiohttp.ClientError as err:
+            # Re-raise aiohttp.ClientError directly
+            raise err
+        except Exception as err:
             _LOGGER.error(
-                "Error fetching account stats from Braiins Pool API: Network or client error: %s",
+                "An unexpected error occurred during API request to %s: %s", url,
                 err,
             )
-            raise BraiinsPoolApiException(f"Network or client error: {err}") from err
+            raise err
 
     async def get_account_stats(self):
         """Fetch account statistics from Braiins Pool API."""

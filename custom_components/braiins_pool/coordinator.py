@@ -90,8 +90,6 @@ class BraiinsDataUpdateCoordinator(DataUpdateCoordinator[dict]):
             processed_data["pool_5m_hash_rate"] = float(daily_hashrate_data.get("btc", {}).get("pool_5m_hash_rate", 0.0))
             processed_data["ok_workers"] = int(user_profile_data.get("btc", {}).get("ok_workers", 0))
 
-            # Placeholder dates for now, will refine later
-            payouts_data = await self.api_client.get_payouts((today - timedelta(days=7)).strftime("%Y-%m-%d"), today.strftime("%Y-%m-%d"))
             return processed_data
         except Exception as err:  # Catch any exception during fetching or processing
             _LOGGER.error(

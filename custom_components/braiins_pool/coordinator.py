@@ -70,11 +70,11 @@ class BraiinsDataUpdateCoordinator(DataUpdateCoordinator[dict]):
             from_date = (today - timedelta(days=7)).strftime("%Y-%m-%d")
             to_date = today.strftime("%Y-%m-%d")
 
-            payouts_data = await self.api_client.get_payouts(
- from_date, to_date
-            )
-            processed_data["block_rewards_data"] = block_rewards_data
+            # Fetching block rewards and payouts
+            block_rewards_data = await self.api_client.get_block_rewards(from_date, to_date)
+            payouts_data = await self.api_client.get_payouts(from_date, to_date)
 
+            processed_data["block_rewards_data"] = block_rewards_data
             workers_data = await self.api_client.get_workers()
             processed_data["workers_data"] = workers_data
 
@@ -91,8 +91,7 @@ class BraiinsDataUpdateCoordinator(DataUpdateCoordinator[dict]):
             processed_data["ok_workers"] = int(user_profile_data.get("btc", {}).get("ok_workers", 0))
 
             # Placeholder dates for now, will refine later
-            payouts_data = await self.api_client.get_payouts(
-                (today - timedelta(days=7)).strftime("%Y-%m-%d"),
+            payouts_data = await self.api_client.get_payouts((today - timedelta(days=7)).strftime("%Y-%m-%d"), today.strftime("%Y-%m-%d"))
             return processed_data
         except Exception as err:  # Catch any exception during fetching or processing
             _LOGGER.error(

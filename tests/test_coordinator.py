@@ -1,11 +1,9 @@
 """Unit tests for the Braiins Pool coordinator."""
 
 from unittest.mock import AsyncMock, patch
-
 import pytest
 
 from homeassistant.helpers.update_coordinator import UpdateFailed
-
 from custom_components.braiins_pool.coordinator import BraiinsDataUpdateCoordinator
 
 pytestmark = pytest.mark.asyncio

@@ -196,18 +196,3 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
         )
 
     # Add more test cases for different error conditions, data structures, etc.
-
-
-# To run these tests, you would typically use a test runner like pytest or unittest
-# and handle asyncio execution, e.g., using pytest-asyncio.
-# Example using unittest in an asyncio context:
-# def async_test(coro):
-#     def wrapper(*args, **kwargs):
-#         loop = asyncio.get_event_loop()
-#         return loop.run_until_complete(coro(*args, **kwargs))
-#     return wrapper
-
-# If running with a framework that handles async tests (like pytest-asyncio):
-# @pytest.mark.asyncio
-# async def test_my_async_function():
-#     ...

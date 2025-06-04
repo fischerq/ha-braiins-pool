@@ -84,6 +84,7 @@ async def test_successful_update_with_new_data(mock_datetime, hass):
     # Assert the presence of raw data from new endpoints
     assert "user_profile_data" in coordinator.data
     assert "daily_hashrate_data" in coordinator.data
+    assert "pool_5m_hash_rate" in coordinator.data # Add assertion for pool_5m_hash_rate
     assert "block_rewards_data" in coordinator.data
     assert "workers_data" in coordinator.data
     assert "payouts_data" in coordinator.data
@@ -94,8 +95,8 @@ async def test_update_failed_api_error(hass):
     "Test data update failure due to API error."
     mock_api_client = AsyncMock()
 
-    mock_api_client.get_account_stats.side_effect = ClientError("API Error")
-    mock_api_client.get_daily_rewards.return_value = {
+    # Cause an API error by having one of the API calls raise a ClientError
+    mock_api_client.get_daily_rewards.side_effect = ClientError("API Error")
         "btc": {"daily_rewards": [{"total_reward": "0.123"}]}
     }
 
@@ -111,7 +112,7 @@ async def test_update_failed_parsing_error(hass):
     "Test data update failure due to parsing error."
     mock_api_client = AsyncMock()
 
-    mock_api_client.get_account_stats.return_value = {}  # Missing expected key
+    mock_api_client.get_user_profile.return_value = {"btc": {}}  # Missing expected keys for user profile
     mock_api_client.get_daily_rewards.return_value = {
         "btc": {"daily_rewards": [{"total_reward": "0.123"}]}
     }
@@ -122,7 +123,14 @@ async def test_update_failed_parsing_error(hass):
     with pytest.raises(UpdateFailed):  # Change expected exception to UpdateFailed
         await coordinator.async_refresh()
 
-    mock_api_client.get_account_stats.assert_called_once()
+    # Ensure relevant API calls were made
+    mock_api_client.get_user_profile.assert_called_once()
+    # The coordinator should still attempt to fetch other data even if one fails
+    mock_api_client.get_daily_rewards.assert_called_once()
+    mock_api_client.get_daily_hashrate.assert_called_once()
+    mock_api_client.get_block_rewards.assert_called_once()
+    mock_api_client.get_workers.assert_called_once()
+    mock_api_client.get_payouts.assert_called_once()
 
 
 @pytest.mark.asyncio
@@ -130,9 +138,7 @@ async def test_update_failed_daily_rewards_parsing_error(hass):
     "Test data update failure due to daily rewards parsing error."
     mock_api_client = AsyncMock()
 
-    mock_api_client.get_account_stats.return_value = {"current_balance": 1.23}
-    mock_api_client.get_daily_rewards.return_value = {
-        "btc": {}
+    mock_api_client.get_daily_rewards.return_value = {"btc": {"daily_rewards": [{}]}
     }  # Missing daily_rewards key
 
     coordinator = BraiinsDataUpdateCoordinator(
@@ -142,7 +148,11 @@ async def test_update_failed_daily_rewards_parsing_error(hass):
     with pytest.raises(UpdateFailed):  # Change expected exception to UpdateFailed
         await coordinator.async_refresh()
 
-    mock_api_client.get_account_stats.assert_called_once()
+    mock_api_client.get_daily_rewards.assert_called_once()
+    # Ensure other API calls were attempted
+    mock_api_client.get_user_profile.assert_called_once()
+    mock_api_client.get_daily_hashrate.assert_called_once()
+    mock_api_client.get_workers.assert_called_once()
     mock_api_client.get_daily_rewards.assert_called_once()
 
 
@@ -152,20 +162,24 @@ async def test_update_failed_missing_new_data_keys(hass):
     mock_api_client = AsyncMock()
 
     # Mock data with missing keys from a new endpoint (e.g., user profile)
+    # We are simulating missing keys that the coordinator *expects* to be able to process.
     mock_api_client.get_daily_rewards.return_value = {
         "btc": {"daily_rewards": [{"total_reward": "0.123"}]}
     }
-    mock_api_client.get_account_stats.return_value = {}
+    # Simulate missing 'all_time_reward' and 'ok_workers' in user profile data
     mock_api_client.get_user_profile.return_value = {
         "btc": {"current_balance": 4.56}
-    }  # Missing 'all_time_reward' and 'ok_workers'
-    mock_api_client.get_daily_hashrate.return_value = {"test": "daily_hashrate_data"}
-    mock_api_client.get_block_rewards.return_value = {"test": "block_rewards_data"}
+    }
+    mock_api_client.get_daily_hashrate.return_value = {
+        "btc": {}
+    }  # Missing 'pool_5m_hash_rate'
+    mock_api_client.get_block_rewards.return_value = {"test": "block_rewards_data"} # Keep this as it doesn't cause parsing error
     mock_api_client.get_workers.return_value = {"test": "workers_data"}
     mock_api_client.get_payouts.return_value = {"test": "payouts_data"}
 
     coordinator = BraiinsDataUpdateCoordinator(
         hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
     )
-    with pytest.raises(UpdateFailed):
+    with pytest.raises(UpdateFailed) as excinfo:
         await coordinator.async_refresh()
+    assert "Error updating data: " in str(excinfo.value)

@@ -115,7 +115,7 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
         )
 
         with self.assertRaises(ClientError):
-            await self.api_client.get_daily_rewards()
+            await self.api_client.get_account_stats()
 
         self.mock_session.get.assert_awaited_once_with(
             "https://pool.braiins.com/accounts/rewards/json/btc",

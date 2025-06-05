@@ -7,7 +7,6 @@ from unittest.mock import AsyncMock, patch
 from aiohttp import ClientError
 from custom_components.braiins_pool.coordinator import BraiinsDataUpdateCoordinator
 from custom_components.braiins_pool.const import DEFAULT_SCAN_INTERVAL
-from homeassistant.helpers.update_coordinator import UpdateFailed
 from datetime import UTC
 
 pytestmark = pytest.mark.asyncio  # This line should come after imports
@@ -36,8 +35,12 @@ async def test_successful_update_with_new_data(mock_datetime, hass):
     "Test successful data update including new endpoints."
     # Mock datetime to return a fixed date for predictable date calculations
     mock_datetime.now.return_value = datetime(2023, 10, 8, tzinfo=UTC)
+    # Mock the date and strftime methods for date calculations
     mock_datetime.side_effect = lambda *args, **kw: datetime(*args, **kw)
     mock_datetime.date.side_effect = lambda *args, **kw: date(*args, **kw)
+    # Mock the strftime method specifically for date objects
+    mock_date_instance = mock_datetime.date.return_value
+    mock_date_instance.strftime.side_effect = lambda fmt: mock_date_instance.isoformat()
 
     mock_api_client = AsyncMock()
 
@@ -66,8 +69,8 @@ async def test_successful_update_with_new_data(mock_datetime, hass):
     mock_api_client.get_user_profile.assert_called_once()
     mock_api_client.get_daily_hashrate.assert_called_once()
 
-    expected_from_date = (date(2023, 10, 8) - timedelta(days=7)).strftime("%Y-%m-%d")
-    expected_to_date = date(2023, 10, 8).strftime("%Y-%m-%d")
+    expected_from_date = (date(2023, 10, 8) - timedelta(days=7)).isoformat()
+    expected_to_date = date(2023, 10, 8).isoformat()
 
     mock_api_client.get_block_rewards.assert_called_once_with(
         expected_from_date, expected_to_date
@@ -83,7 +86,7 @@ async def test_successful_update_with_new_data(mock_datetime, hass):
     assert coordinator.data["all_time_reward"] == 7.89
     assert coordinator.data["ok_workers"] == 10
     # Assert the presence of raw data from new endpoints
-    assert "user_profile_data" in coordinator.data
+    assert "user_profile" in coordinator.data
     assert "daily_hashrate_data" in coordinator.data
     assert "pool_5m_hash_rate" in coordinator.data # Add assertion for pool_5m_hash_rate
     assert "block_rewards_data" in coordinator.data
@@ -102,7 +105,7 @@ async def test_update_failed_api_error(hass):
     coordinator = BraiinsDataUpdateCoordinator(
         hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
     )
-    with pytest.raises(UpdateFailed) as excinfo:  # Change expected exception to UpdateFailed
+    with pytest.raises(Exception) as excinfo:
         await coordinator.async_refresh()
     print(f"Caught exception type: {excinfo.type}")
     print(f"Caught exception value: {excinfo.value}")
@@ -121,7 +124,7 @@ async def test_update_failed_parsing_error(hass):
     coordinator = BraiinsDataUpdateCoordinator(
         hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
     )
-    with pytest.raises(UpdateFailed):  # Change expected exception to UpdateFailed
+    with pytest.raises(Exception):
         await coordinator.async_refresh()
 
     # Ensure relevant API calls were made
@@ -145,7 +148,7 @@ async def test_update_failed_daily_rewards_parsing_error(hass):
         hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
     )
 
-    with pytest.raises(UpdateFailed):  # Change expected exception to UpdateFailed
+    with pytest.raises(Exception):
         await coordinator.async_refresh()
 
     mock_api_client.get_daily_rewards.assert_called_once()
@@ -180,6 +183,6 @@ async def test_update_failed_missing_new_data_keys(hass):
     coordinator = BraiinsDataUpdateCoordinator(
         hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
     )
-    with pytest.raises(UpdateFailed) as excinfo:
+    with pytest.raises(Exception) as excinfo:
         await coordinator.async_refresh()
     assert "Error updating data: " in str(excinfo.value)

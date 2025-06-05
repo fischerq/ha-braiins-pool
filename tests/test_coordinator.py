@@ -34,7 +34,7 @@ async def test_successful_update(hass):
 async def test_successful_update_with_new_data(mock_datetime, hass):
     "Test successful data update including new endpoints."
     # Mock datetime to return a fixed date for predictable date calculations
-    mock_datetime.utcnow.return_value = datetime(2023, 10, 8)
+    mock_datetime.now.return_value = datetime(2023, 10, 8, tzinfo=datetime.UTC)
     mock_datetime.side_effect = lambda *args, **kw: datetime(*args, **kw)
     mock_datetime.date.side_effect = lambda *args, **kw: date(*args, **kw)
 

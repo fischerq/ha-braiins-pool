@@ -74,16 +74,9 @@ async def test_successful_update_with_new_data(mock_datetime, hass):
     mock_api_client.get_user_profile.assert_called_once()
     mock_api_client.get_daily_hashrate.assert_called_once()
 
-    expected_from_date = (date(2023, 10, 8) - timedelta(days=7)).strftime("%Y-%m-%d")
-    expected_to_date = date(2023, 10, 8).strftime("%Y-%m-%d")
-
-    mock_api_client.get_block_rewards.assert_called_once_with(
-        expected_from_date, expected_to_date
-    )
+    mock_api_client.get_block_rewards.assert_called_once_with('2023-10-01', '2023-10-08')
     mock_api_client.get_workers.assert_called_once()
-    mock_api_client.get_payouts.assert_called_once_with(
-        expected_from_date, expected_to_date
-    )
+    mock_api_client.get_payouts.assert_called_once_with('2023-10-01', '2023-10-08')
 
     # Assert that processed_data contains the expected values
     assert coordinator.data["today_reward"] == 0.123

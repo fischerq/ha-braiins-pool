@@ -32,15 +32,13 @@ async def test_successful_update(hass):
 @pytest.mark.asyncio
 @patch("custom_components.braiins_pool.coordinator.datetime")
 async def test_successful_update_with_new_data(mock_datetime, hass):
-    "Test successful data update including new endpoints."
+    """Test successful data update including new endpoints."""
     # Mock datetime to return a fixed date for predictable date calculations
     mock_datetime.now.return_value = datetime(2023, 10, 8, tzinfo=UTC)
-    # Mock the date and strftime methods for date calculations
-    mock_datetime.side_effect = lambda *args, **kw: datetime(*args, **kw)
-    mock_datetime.date.side_effect = lambda *args, **kw: date(*args, **kw)
-    # Mock the strftime method specifically for date objects
-    mock_date_instance = mock_datetime.date.return_value
-    mock_date_instance.strftime.side_effect = lambda fmt: mock_date_instance.isoformat()
+    # Mock the date() call on the mocked datetime object
+    mock_date_return = date(2023, 10, 8)
+    mock_datetime.now.return_value.date.return_value = mock_date_return
+    mock_date_return.strftime.side_effect = lambda fmt: mock_date_return.isoformat()
 
     mock_api_client = AsyncMock()
 

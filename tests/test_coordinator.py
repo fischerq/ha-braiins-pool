@@ -101,10 +101,12 @@ async def test_update_failed_api_error(hass):
     coordinator = BraiinsDataUpdateCoordinator(
         hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
     )
-    with pytest.raises(UpdateFailed):  # Change expected exception to UpdateFailed
+ with pytest.raises(UpdateFailed) as excinfo:  # Change expected exception to UpdateFailed
         await coordinator.async_refresh()
+ print(f"Caught exception type: {excinfo.type}")
+ print(f"Caught exception value: {excinfo.value}")
 
-    mock_api_client.get_account_stats.assert_called_once()
+    mock_api_client.get_user_profile.assert_called_once()
 @pytest.mark.asyncio
 async def test_update_failed_parsing_error(hass):
     "Test data update failure due to parsing error."

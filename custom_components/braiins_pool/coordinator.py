@@ -8,7 +8,7 @@ import aiohttp
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, UTC
 
 from .const import (
     DOMAIN,
@@ -43,7 +43,7 @@ class BraiinsDataUpdateCoordinator(DataUpdateCoordinator[dict]):
     async def _async_update_data(self) -> dict:
         """Fetch data from the API."""
         _LOGGER.debug("Fetching and processing data for Braiins Pool integration.")
-        processed_data = {}
+        processed_data: dict = {}
         today = datetime.utcnow().date()
 
         # Fetch data from all APIs first

@@ -8,6 +8,7 @@ from aiohttp import ClientError
 from custom_components.braiins_pool.coordinator import BraiinsDataUpdateCoordinator
 from custom_components.braiins_pool.const import DEFAULT_SCAN_INTERVAL
 from homeassistant.helpers.update_coordinator import UpdateFailed
+from datetime import UTC
 
 pytestmark = pytest.mark.asyncio  # This line should come after imports
 
@@ -34,7 +35,7 @@ async def test_successful_update(hass):
 async def test_successful_update_with_new_data(mock_datetime, hass):
     "Test successful data update including new endpoints."
     # Mock datetime to return a fixed date for predictable date calculations
-    mock_datetime.now.return_value = datetime(2023, 10, 8, tzinfo=datetime.UTC)
+    mock_datetime.now.return_value = datetime(2023, 10, 8, tzinfo=UTC)
     mock_datetime.side_effect = lambda *args, **kw: datetime(*args, **kw)
     mock_datetime.date.side_effect = lambda *args, **kw: date(*args, **kw)
 

@@ -1,6 +1,9 @@
+import logging
 import asyncio
 import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+logging.basicConfig(level=logging.DEBUG)
 
 from aiohttp import ClientError
 from aiohttp.client_exceptions import ContentTypeError

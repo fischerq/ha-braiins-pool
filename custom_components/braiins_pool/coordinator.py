@@ -85,10 +85,25 @@ class BraiinsDataUpdateCoordinator(DataUpdateCoordinator[dict]):
             processed_data["payouts_data"] = payouts_data # Keep raw data as well
 
             # Extract and process specific data points
-            processed_data["current_balance"] = float(user_profile_data.get("btc", {}).get("current_balance", 0.0))
-            processed_data["all_time_reward"] = float(user_profile_data.get("btc", {}).get("all_time_reward", 0.0))
-            processed_data["pool_5m_hash_rate"] = float(daily_hashrate_data.get("btc", {}).get("pool_5m_hash_rate", 0.0))
-            processed_data["ok_workers"] = int(user_profile_data.get("btc", {}).get("ok_workers", 0))
+            try:
+                processed_data["current_balance"] = float(user_profile_data.get("btc", {}).get("current_balance", 0.0))
+                processed_data["all_time_reward"] = float(user_profile_data.get("btc", {}).get("all_time_reward", 0.0))
+                processed_data["ok_workers"] = int(user_profile_data.get("btc", {}).get("ok_workers", 0))
+            except (ValueError, TypeError, KeyError) as e:
+                _LOGGER.error("Error parsing user profile data: %s", e)
+                # Set default values and continue
+                processed_data["current_balance"] = 0.0
+                processed_data["all_time_reward"] = 0.0
+                processed_data["ok_workers"] = 0
+
+
+            try:
+                 processed_data["pool_5m_hash_rate"] = float(daily_hashrate_data.get("btc", {}).get("pool_5m_hash_rate", 0.0))
+            except (ValueError, TypeError, KeyError) as e:
+                _LOGGER.error("Error parsing daily hashrate data: %s", e)
+                # Set default values and continue
+                processed_data["pool_5m_hash_rate"] = 0.0
+
 
             return processed_data
         except Exception as err:  # Catch any exception during fetching or processing

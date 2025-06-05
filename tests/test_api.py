@@ -19,20 +19,20 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
 
     async def mock_response(self, status=200, json_data=None):
         """Helper to create a mock ClientResponse."""
-        mock_resp = MagicMock()
+        mock_resp = AsyncMock()  # Use AsyncMock
         mock_resp.status = status
         mock_resp.json = AsyncMock(
             return_value=json_data if json_data is not None else {}
         )
         mock_resp.raise_for_status = MagicMock()  # Add raise_for_status mock
-        mock_resp.text = AsyncMock(return_value="Error response text")  # Add text mock
+        mock_resp.text = AsyncMock(return_value="Error response text")
 
         if status >= 400:
             mock_resp.raise_for_status.side_effect = ClientError(
                 f"Mock HTTP error {status}"
             )
         pytestmark = pytest.mark.asyncio  # This line should come after imports
-
+        return mock_resp # Return the AsyncMock instance
         # Mock __aenter__ and __aexit__ for async context manager
         pytestmark = pytest.mark.asyncio
 

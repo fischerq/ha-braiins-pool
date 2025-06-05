@@ -17,6 +17,7 @@ async def test_successful_update(hass):
     "Test successful data update."
     mock_api_client = AsyncMock()
     mock_api_client.get_account_stats.return_value = {"current_balance": 1.23}
+    # The daily rewards endpoint structure has changed
     mock_api_client.get_daily_rewards.return_value = {
         "btc": {"daily_rewards": [{"total_reward": "0.123"}]}
     }
@@ -35,8 +36,13 @@ async def test_successful_update_with_new_data(mock_datetime, hass):
     """Test successful data update including new endpoints."""
     # Mock datetime to return a fixed date for predictable date calculations
     mock_datetime.now.return_value = datetime(2023, 10, 8, tzinfo=UTC)
-    # Mock the date() call on the mocked datetime object
-    mock_date_return = date(2023, 10, 8)
+
+    # Create a mock date object and mock its strftime method
+    mock_date_object = MagicMock(spec=date)
+    mock_date_object.strftime.side_effect = lambda fmt: date(2023, 10, 8).strftime(fmt)
+
+    # Set the return_value of the date() call on the mocked datetime object
+    mock_datetime.now.return_value.date.return_value = mock_date_object
     mock_datetime.now.return_value.date.return_value = mock_date_return
     mock_date_return.strftime.side_effect = lambda fmt: mock_date_return.isoformat()
 
@@ -67,8 +73,8 @@ async def test_successful_update_with_new_data(mock_datetime, hass):
     mock_api_client.get_user_profile.assert_called_once()
     mock_api_client.get_daily_hashrate.assert_called_once()
 
-    expected_from_date = (date(2023, 10, 8) - timedelta(days=7)).isoformat()
-    expected_to_date = date(2023, 10, 8).isoformat()
+    expected_from_date = (date(2023, 10, 8) - timedelta(days=7)).strftime("%Y-%m-%d")
+    expected_to_date = date(2023, 10, 8).strftime("%Y-%m-%d")
 
     mock_api_client.get_block_rewards.assert_called_once_with(
         expected_from_date, expected_to_date
@@ -83,7 +89,7 @@ async def test_successful_update_with_new_data(mock_datetime, hass):
     assert coordinator.data["current_balance"] == 4.56
     assert coordinator.data["all_time_reward"] == 7.89
     assert coordinator.data["ok_workers"] == 10
-    # Assert the presence of raw data from new endpoints
+    # Assert the presence of data from various endpoints
     assert "user_profile" in coordinator.data
     assert "daily_hashrate_data" in coordinator.data
     assert "pool_5m_hash_rate" in coordinator.data # Add assertion for pool_5m_hash_rate

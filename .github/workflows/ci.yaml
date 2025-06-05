@@ -27,3 +27,13 @@ jobs:
 
     - name: Run tests
       run: ./run_tests.sh
+
+  validate-hacs:
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: HACS validation
+        uses: "hacs/action@main"
+        with:
+          category: "integration"
+      - uses: "actions/checkout@v3"
+      - uses: home-assistant/actions/hassfest@master

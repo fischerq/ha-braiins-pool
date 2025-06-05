@@ -33,18 +33,19 @@ async def test_successful_update(hass):
 @pytest.mark.asyncio
 @patch("custom_components.braiins_pool.coordinator.datetime")
 async def test_successful_update_with_new_data(mock_datetime, hass):
-    """Test successful data update including new endpoints."""
-    # Mock datetime to return a fixed date for predictable date calculations
-    mock_datetime.now.return_value = datetime(2023, 10, 8, tzinfo=UTC)
+    """Test successful data update including new endpoints."""    # Mock datetime to return a fixed date for predictable date calculations
+    mock_now = AsyncMock()
+    mock_datetime.now.return_value = mock_now
+    mock_datetime.UTC = UTC  # Ensure UTC is available on the mock
 
-    # Create a mock date object and mock its strftime method
-    mock_date_object = MagicMock(spec=date)
-    mock_date_object.strftime.side_effect = lambda fmt: date(2023, 10, 8).strftime(fmt)
+    mock_date = AsyncMock()
+    mock_now.date.return_value = mock_date
 
-    # Set the return_value of the date() call on the mocked datetime object
-    mock_datetime.now.return_value.date.return_value = mock_date_object
-    mock_datetime.now.return_value.date.return_value = mock_date_return
-    mock_date_return.strftime.side_effect = lambda fmt: mock_date_return.isoformat()
+    # Configure the mock date object's strftime method
+    def mock_strftime(fmt):
+        if fmt == "%Y-%m-%d":
+            return "2023-10-08"
+    mock_date.strftime.side_effect = mock_strftime
 
     mock_api_client = AsyncMock()
 

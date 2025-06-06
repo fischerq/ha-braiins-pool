@@ -35,9 +35,7 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
                 f"Mock HTTP error {status}"
             )
         pytestmark = pytest.mark.asyncio  # This line should come after imports
-        return mock_resp # Return the AsyncMock instance
-        # Mock __aenter__ and __aexit__ for async context manager
-        pytestmark = pytest.mark.asyncio
+        return mock_resp
 
     @patch("custom_components.braiins_pool.api._LOGGER")
     async def test_get_account_stats_success(self, mock_logger):

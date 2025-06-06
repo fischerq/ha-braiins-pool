@@ -44,7 +44,7 @@ class BraiinsDataUpdateCoordinator(DataUpdateCoordinator[dict]):
         """Fetch data from the API."""
         _LOGGER.debug("Fetching and processing data for Braiins Pool integration.")
         processed_data: dict = {}
-        today = datetime.datetime.now(datetime.UTC).date()
+        today = datetime.now(datetime.UTC).date()
 
         # Fetch data from all APIs first
         try:

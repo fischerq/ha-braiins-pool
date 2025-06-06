@@ -11,6 +11,10 @@ from datetime import UTC
 
 pytestmark = pytest.mark.asyncio  # This line should come after imports
 
+import sys
+
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
 
 @pytest.mark.asyncio
 async def test_successful_update(hass):
@@ -53,9 +57,6 @@ async def test_successful_update_with_new_data(mock_datetime, hass):
     mock_api_client.get_daily_rewards.return_value = {
         "btc": {"daily_rewards": [{"total_reward": "0.123"}]}
     }
-    mock_api_client.get_account_stats.return_value = (
-        {}
-    )  # No longer used for balance/reward
     mock_api_client.get_user_profile.return_value = {
         "btc": {"current_balance": 4.56, "all_time_reward": 7.89, "ok_workers": 10}
     }
@@ -73,7 +74,6 @@ async def test_successful_update_with_new_data(mock_datetime, hass):
     mock_api_client.get_daily_rewards.assert_called_once()
     mock_api_client.get_user_profile.assert_called_once()
     mock_api_client.get_daily_hashrate.assert_called_once()
-
     mock_api_client.get_block_rewards.assert_called_once_with('2023-10-01', '2023-10-08')
     mock_api_client.get_workers.assert_called_once()
     mock_api_client.get_payouts.assert_called_once_with('2023-10-01', '2023-10-08')
@@ -86,7 +86,7 @@ async def test_successful_update_with_new_data(mock_datetime, hass):
     # Assert the presence of data from various endpoints
     assert "user_profile" in coordinator.data
     assert "daily_hashrate_data" in coordinator.data
-    assert "pool_5m_hash_rate" in coordinator.data # Add assertion for pool_5m_hash_rate
+    assert "pool_5m_hash_rate" in coordinator.data
     assert "block_rewards_data" in coordinator.data
     assert "workers_data" in coordinator.data
     assert "payouts_data" in coordinator.data
@@ -105,8 +105,9 @@ async def test_update_failed_api_error(hass):
     )
     with pytest.raises(Exception) as excinfo:
         await coordinator.async_refresh()
-    print(f"Caught exception type: {excinfo.type}")
-    print(f"Caught exception value: {excinfo.value}")
+    eprint("test yupdate failed ", coordinator.data)
+    eprint(f"Caught exception type: {excinfo.type}")
+    eprint(f"Caught exception value: {excinfo.value}")
 
     mock_api_client.get_user_profile.assert_called_once()
 @pytest.mark.asyncio

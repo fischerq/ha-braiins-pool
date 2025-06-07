@@ -1,14 +1,18 @@
 import logging
 import asyncio
-import unittest
-from unittest.mock import AsyncMock, MagicMock, patch
+from datetime import timedelta
+from unittest.mock import AsyncMock, patch
 
 logging.basicConfig(level=logging.DEBUG)
+
+import pytest
 
 from aiohttp import ClientError
 from aiohttp.client_exceptions import ContentTypeError
 
 from custom_components.braiins_pool.api import BraiinsPoolApiClient
+from custom_components.braiins_pool.coordinator import BraiinsPoolUpdateCoordinator
+
 import pytest
 
 
@@ -28,7 +32,7 @@ class TestBraiinsPoolApiClient(unittest.TestCase):
             return_value=json_data if json_data is not None else {}
         )
         mock_resp.raise_for_status = MagicMock()  # Add raise_for_status mock
-        mock_resp.text = AsyncMock(return_value="Error response text")
+
 
         if status >= 400:
             mock_resp.raise_for_status.side_effect = ClientError(

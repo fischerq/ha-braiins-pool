@@ -44,7 +44,7 @@ class BraiinsDataUpdateCoordinator(DataUpdateCoordinator[dict]):
         """Fetch data from the API."""
         _LOGGER.debug("Fetching and processing data for Braiins Pool integration.")
         processed_data: dict = {}
-        today = datetime.now(datetime.UTC).date()
+        today = datetime.now(UTC).date()
 
         # Fetch data from all APIs first
         try:
@@ -96,14 +96,12 @@ class BraiinsDataUpdateCoordinator(DataUpdateCoordinator[dict]):
                 processed_data["all_time_reward"] = 0.0
                 processed_data["ok_workers"] = 0
 
-
             try:
                  processed_data["pool_5m_hash_rate"] = float(daily_hashrate_data.get("btc", {}).get("pool_5m_hash_rate", 0.0))
             except (ValueError, TypeError, KeyError) as e:
                 _LOGGER.error("Error parsing daily hashrate data: %s", e)
                 # Set default values and continue
                 processed_data["pool_5m_hash_rate"] = 0.0
-
 
             return processed_data
         except Exception as err:  # Catch any exception during fetching or processing

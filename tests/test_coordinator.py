@@ -1,7 +1,7 @@
 """Unit tests for the Braiins Pool coordinator."""
 
 import pytest
-from datetime import timedelta, datetime, date
+from datetime import timedelta
 from unittest.mock import AsyncMock, patch
 
 from aiohttp import ClientError
@@ -9,6 +9,7 @@ from custom_components.braiins_pool.coordinator import BraiinsDataUpdateCoordina
 from custom_components.braiins_pool.const import DEFAULT_SCAN_INTERVAL
 from datetime import UTC
 
+from freezegun import freeze_time
 pytestmark = pytest.mark.asyncio  # This line should come after imports
 
 import sys
@@ -35,21 +36,9 @@ async def test_successful_update(hass):
 
 
 @pytest.mark.asyncio
-@patch("custom_components.braiins_pool.coordinator.datetime")
-async def test_successful_update_with_new_data(mock_datetime, hass):
-    """Test successful data update including new endpoints."""    # Mock datetime to return a fixed date for predictable date calculations
-    mock_now = AsyncMock()
-    mock_datetime.now.return_value = mock_now
-    mock_datetime.UTC = UTC  # Ensure UTC is available on the mock
-
-    mock_date = AsyncMock()
-    mock_now.date.return_value = mock_date
-
-    # Configure the mock date object's strftime method
-    def mock_strftime(fmt):
-        if fmt == "%Y-%m-%d":
-            return "2023-10-08"
-    mock_date.strftime.side_effect = mock_strftime
+@freeze_time("2023-10-08 12:00:00")
+async def test_successful_update_with_new_data(hass):
+    """Test successful data update including new endpoints."""
 
     mock_api_client = AsyncMock()
 

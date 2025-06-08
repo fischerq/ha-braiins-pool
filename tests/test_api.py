@@ -11,7 +11,7 @@ from aiohttp import ClientError
 from aiohttp.client_exceptions import ContentTypeError
 
 from custom_components.braiins_pool.api import BraiinsPoolApiClient
-from custom_components.braiins_pool.coordinator import BraiinsPoolUpdateCoordinator
+from custom_components.braiins_pool.coordinator import BraiinsDataUpdateCoordinator
 
 import pytest
 

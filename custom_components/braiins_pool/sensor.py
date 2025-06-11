@@ -11,7 +11,7 @@ from homeassistant.components.sensor import (
 from homeassistant.const import UnitOfDataRate
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN
+from .const import DOMAIN, CONF_REWARDS_ACCOUNT_NAME
 from .coordinator import BraiinsDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -61,9 +61,10 @@ SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Set up the sensor platform."""
     coordinator: BraiinsDataUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id]
+    rewards_account_name = config_entry.data.get(CONF_REWARDS_ACCOUNT_NAME) # Get account name
 
     entities = [
-        BraiinsPoolSensor(coordinator, description, config_entry.entry_id)
+        BraiinsPoolSensor(coordinator, description, config_entry) # Pass config_entry
         for description in SENSOR_TYPES
     ]
 
@@ -73,12 +74,27 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 class BraiinsPoolSensor(CoordinatorEntity, SensorEntity):
     """Representation of a Braiins Pool sensor."""
 
-    def __init__(self, coordinator, entity_description, entry_id):
+    def __init__(self, coordinator, entity_description, config_entry): # Add config_entry
         """Initialize the sensor."""
         super().__init__(coordinator)
-        self._attr_name = f"{entity_description.name}"
         self.entity_description = entity_description
-        self._attr_unique_id = f"{entry_id}_{self.entity_description.key}"
+        self._config_entry = config_entry # Store config_entry
+        # Use rewards_account_name for a more descriptive name if desired, or keep as is
+        # For example, self._attr_name = f"{config_entry.data.get(CONF_REWARDS_ACCOUNT_NAME)} {entity_description.name}"
+        # However, the original naming seems fine, as the device will carry the main account name.
+        self._attr_name = entity_description.name
+        self._attr_unique_id = f"{self._config_entry.entry_id}_{self.entity_description.key}"
+
+    @property
+    def device_info(self):
+        """Return device information."""
+        account_name = self._config_entry.data.get(CONF_REWARDS_ACCOUNT_NAME, "Braiins Pool")
+        return {
+            "identifiers": {(DOMAIN, self._config_entry.entry_id)},
+            "name": account_name,
+            "manufacturer": "Braiins",
+            "entry_type": "service", # Or remove if not applicable
+        }
 
     @property
     def native_value(self):

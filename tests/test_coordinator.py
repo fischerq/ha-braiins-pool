@@ -73,7 +73,7 @@ async def test_successful_update_with_new_data(hass):
     assert coordinator.data["all_time_reward"] == 7.89
     assert coordinator.data["ok_workers"] == 10
     # Assert the presence of data from various endpoints
- assert "user_profile_data" in coordinator.data
+    assert "user_profile_data" in coordinator.data
     assert "daily_hashrate_data" in coordinator.data
     assert "pool_5m_hash_rate" in coordinator.data
     assert "block_rewards_data" in coordinator.data

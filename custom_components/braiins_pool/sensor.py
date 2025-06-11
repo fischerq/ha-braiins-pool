@@ -8,7 +8,7 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.const import CURRENCY_BITCOIN, UnitOfDataRate
+from homeassistant.const import UnitOfDataRate
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
@@ -21,7 +21,7 @@ SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
         key="today_reward",
         name="Braiins Pool Today's Reward",
         icon="mdi:bitcoin",
-        native_unit_of_measurement=CURRENCY_BITCOIN,
+        native_unit_of_measurement="BTC",
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.MONETARY,
     ),
@@ -29,7 +29,7 @@ SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
         key="current_balance",
         name="Braiins Pool Current Balance",
         icon="mdi:wallet-outline",
-        native_unit_of_measurement=CURRENCY_BITCOIN,
+        native_unit_of_measurement="BTC",
         state_class=SensorStateClass.MEASUREMENT,
         device_class=SensorDeviceClass.MONETARY,
     ),
@@ -37,7 +37,7 @@ SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
         key="all_time_reward",
         name="Braiins Pool All Time Reward",
         icon="mdi:medal-outline",
-        native_unit_of_measurement=CURRENCY_BITCOIN,
+        native_unit_of_measurement="BTC",
         state_class=SensorStateClass.TOTAL_INCREASING,
         device_class=SensorDeviceClass.MONETARY,
     ),

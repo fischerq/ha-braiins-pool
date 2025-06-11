@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, patch
 from aiohttp import ClientError
 from custom_components.braiins_pool.coordinator import BraiinsDataUpdateCoordinator
 from custom_components.braiins_pool.const import DEFAULT_SCAN_INTERVAL
-from datetime import UTC
+from homeassistant.helpers.update_coordinator import UpdateFailed
 
 from freezegun import freeze_time
 pytestmark = pytest.mark.asyncio  # This line should come after imports
@@ -73,7 +73,7 @@ async def test_successful_update_with_new_data(hass):
     assert coordinator.data["all_time_reward"] == 7.89
     assert coordinator.data["ok_workers"] == 10
     # Assert the presence of data from various endpoints
-    assert "user_profile" in coordinator.data
+ assert "user_profile_data" in coordinator.data
     assert "daily_hashrate_data" in coordinator.data
     assert "pool_5m_hash_rate" in coordinator.data
     assert "block_rewards_data" in coordinator.data
@@ -92,7 +92,7 @@ async def test_update_failed_api_error(hass):
     coordinator = BraiinsDataUpdateCoordinator(
         hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
     )
-    with pytest.raises(Exception) as excinfo:
+    with pytest.raises(UpdateFailed) as excinfo:
         await coordinator.async_refresh()
     eprint("test yupdate failed ", coordinator.data)
     eprint(f"Caught exception type: {excinfo.type}")
@@ -112,7 +112,7 @@ async def test_update_failed_parsing_error(hass):
     coordinator = BraiinsDataUpdateCoordinator(
         hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
     )
-    with pytest.raises(Exception):
+    with pytest.raises(UpdateFailed):
         await coordinator.async_refresh()
 
     # Ensure relevant API calls were made
@@ -136,7 +136,7 @@ async def test_update_failed_daily_rewards_parsing_error(hass):
         hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
     )
 
-    with pytest.raises(Exception):
+    with pytest.raises(UpdateFailed):
         await coordinator.async_refresh()
 
     mock_api_client.get_daily_rewards.assert_called_once()

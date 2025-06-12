@@ -21,7 +21,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     api_key = entry.data[CONF_API_KEY]
 
     session = async_get_clientsession(hass)
-    api_client = BraiinsPoolApiClient(api_key, session)
+    api_client = BraiinsPoolApiClient(session, api_key)
 
     coordinator = BraiinsDataUpdateCoordinator(
         hass,

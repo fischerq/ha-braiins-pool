@@ -2,6 +2,7 @@
 
 import logging
 import aiohttp
+import json # Add this import at the top of the file
 
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
@@ -48,7 +49,19 @@ class BraiinsPoolApiClient:
             # For now, assuming the provided url is the full endpoint URL.
             async with self._session.get(url, headers=headers) as response:
                 response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
-                return await response.json()
+                try:
+                    return await response.json()
+                except (aiohttp.ContentTypeError, json.JSONDecodeError) as json_err:
+                    response_text = await response.text()
+                    self._LOGGER.error(
+                        "API request to %s returned non-JSON response (status: %s). Response snippet: %s",
+                        url,
+                        response.status,
+                        response_text[:500],  # Log a snippet
+                    )
+                    raise BraiinsPoolApiException(
+                        f"API returned non-JSON response (status: {response.status}). Expected JSON but got: '{response_text[:100]}...'"
+                    ) from json_err
         except aiohttp.ClientResponseError as err:
             if (
                 err.status == 403

@@ -1,23 +1,9 @@
 """Unit tests for the Braiins Pool coordinator."""
 
-from unittest.mock import patch
 import homeassistant.util.dt as dt_util_real # Use a different alias to avoid conflict
-
-def _mocked_set_time_zone(self, time_zone_str):
-    # Force UTC
-    actual_utc_zone = dt_util_real.get_time_zone("UTC")
-    if actual_utc_zone:
-        self.time_zone = "UTC"
-        dt_util_real.set_default_time_zone(actual_utc_zone)
-    else:
-        # This would indicate a deeper problem if UTC itself cannot be found
-        raise ValueError("Mocked set_time_zone could not resolve UTC")
-
-patch('homeassistant.core.Config.set_time_zone', _mocked_set_time_zone).start()
-
 import pytest
 from datetime import timedelta
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock
 
 from aiohttp import ClientError
 from custom_components.braiins_pool.coordinator import BraiinsDataUpdateCoordinator

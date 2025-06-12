@@ -57,19 +57,20 @@ class BraiinsPoolApiClient:
                     "Braiins Pool API Authentication Error: Invalid API key or insufficient permissions."
                 )
                 raise BraiinsPoolAuthError("Invalid API key") from err
+            # For other ClientResponseErrors (like 401, 500)
             self._LOGGER.error(
-                "Error fetching account stats from Braiins Pool API: Status %s, %s",
-                response.status,
-                await response.text(),  # Use response.text() for more detailed error info
+                "Error fetching data from Braiins Pool API: Status %s, Message: %s",
+                err.status,
+                err.message,
             )
             raise BraiinsPoolApiException(
-                f"API error {response.status}: {await response.text()}"
+                f"API error {err.status}: {err.message}"
             ) from err
         except aiohttp.ClientError as err:
             # Re-raise aiohttp.ClientError directly
             raise err
         except Exception as err:
-            _LOGGER.error(
+            self._LOGGER.error(
                 "An unexpected error occurred during API request to %s: %s", url,
                 err,
             )

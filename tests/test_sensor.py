@@ -15,7 +15,7 @@ MOCK_REWARDS_ACCOUNT_NAME = "My Miner Sensors"
 MOCK_ENTRY_ID = "sensor_entry_1"
 
 @pytest.fixture
-def mock_config_entry_data(self):
+def mock_config_entry_data():
     """Provide mock config entry data."""
     return {
         CONF_API_KEY: MOCK_API_KEY,
@@ -23,7 +23,7 @@ def mock_config_entry_data(self):
     }
 
 @pytest.fixture
-def mock_coordinator(self, hass, mock_config_entry_data):
+def mock_coordinator(hass, mock_config_entry_data):
     """Mock BraiinsDataUpdateCoordinator."""
     coordinator = MagicMock(spec=BraiinsDataUpdateCoordinator)
     coordinator.hass = hass
@@ -40,7 +40,7 @@ def mock_coordinator(self, hass, mock_config_entry_data):
     return coordinator
 
 @pytest.fixture
-def mock_config_entry_obj(self, mock_config_entry_data):
+def mock_config_entry_obj(mock_config_entry_data):
     """Returns a mock ConfigEntry object"""
     entry = MagicMock(spec=ConfigEntry)
     entry.data = mock_config_entry_data

@@ -1,5 +1,6 @@
 import pytest
 from unittest.mock import patch
+from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from homeassistant import config_entries, data_entry_flow
 from homeassistant.core import HomeAssistant
@@ -78,7 +79,7 @@ async def test_config_flow_empty_rewards_name(hass: HomeAssistant):
 async def test_config_flow_already_configured(hass: HomeAssistant):
     """Test config flow when an entry with the same unique ID (rewards account name) already exists."""
     # Create a mock entry first
-    mock_entry = config_entries.MockConfigEntry(
+    mock_entry = MockConfigEntry(
         domain=DOMAIN,
         unique_id=MOCK_REWARDS_ACCOUNT_NAME,
         data={CONF_API_KEY: "another_key", CONF_REWARDS_ACCOUNT_NAME: MOCK_REWARDS_ACCOUNT_NAME},

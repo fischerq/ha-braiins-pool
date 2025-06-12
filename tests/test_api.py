@@ -134,10 +134,23 @@ async def test_request_returns_non_json_response_json_decode_error(mock_logger, 
     assert "status: 200" in str(excinfo.value)
     assert "{malformed_json"[:100] in str(excinfo.value)
 
+    # Check for debug logs
+    assert any(
+        call.args[0] == "Making API request to: %s, Headers: %s" for call in mock_logger.debug.call_args_list
+    ), "Request URL and headers not logged at DEBUG level"
+    assert any(
+        call.args[0] == "Received API response: Status: %s, Headers: %s" for call in mock_logger.debug.call_args_list
+    ), "Response status and headers not logged at DEBUG level"
+    assert any(
+        call.args[0] == "API Response Body: %s" and call.args[1] == "{malformed_json" for call in mock_logger.debug.call_args_list
+    ), "Response body not logged at DEBUG level or content mismatch"
+
     mock_logger.error.assert_called_once()
-    args, _ = mock_logger.error.call_args
-    assert "returned non-JSON response" in args[0]
-    assert "{malformed_json"[:500] in args[3]
+    args, kwargs = mock_logger.error.call_args # Use kwargs if format specifiers are named
+    assert args[0] == "API request to %s returned non-JSON response (status: %s). Response text: %s"
+    assert args[1] == "https://pool.braiins.com/stats/json/btc" # Expected URL
+    assert args[2] == 200 # Expected status
+    assert args[3] == "{malformed_json" # Expected response text
 
 @patch("custom_components.braiins_pool.api.BraiinsPoolApiClient._LOGGER")
 async def test_get_account_stats_401(mock_logger, api_client_fixture):

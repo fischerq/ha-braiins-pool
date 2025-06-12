@@ -41,26 +41,32 @@ class BraiinsPoolApiClient:
     async def _request(self, url: str):
         """Helper method to perform API requests."""
         headers = {k: v.format(self._api_key) for k, v in API_HEADERS.items()}
-        self._LOGGER.debug("Making API request to: %s", url)
+        self._LOGGER.debug("Making API request to: %s, Headers: %s", url, headers)
         try:
             # Assume BRAIINS_API_URL is the base URL and the provided url is the endpoint path
             # If BRAIINS_API_URL is the full URL for stats, the daily rewards URL is also a full URL.
             # This needs to be clarified in const.py or handled differently if not consistent.
             # For now, assuming the provided url is the full endpoint URL.
             async with self._session.get(url, headers=headers) as response:
+                self._LOGGER.debug(
+                    "Received API response: Status: %s, Headers: %s",
+                    response.status,
+                    response.headers,
+                )
+                response_text = await response.text()
+                self._LOGGER.debug("API Response Body: %s", response_text)
                 response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
                 try:
-                    return await response.json()
+                    return json.loads(response_text)
                 except (aiohttp.ContentTypeError, json.JSONDecodeError) as json_err:
-                    response_text = await response.text()
                     self._LOGGER.error(
-                        "API request to %s returned non-JSON response (status: %s). Response snippet: %s",
+                        "API request to %s returned non-JSON response (status: %s). Response text: %s",
                         url,
                         response.status,
-                        response_text[:500],  # Log a snippet
+                        response_text,
                     )
                     raise BraiinsPoolApiException(
-                        f"API returned non-JSON response (status: {response.status}). Expected JSON but got: '{response_text[:100]}...'"
+                        f"API returned non-JSON response. Status: {response.status}, Body: {response_text}"
                     ) from json_err
         except aiohttp.ClientResponseError as err:
             if (
@@ -82,6 +88,10 @@ class BraiinsPoolApiClient:
         except aiohttp.ClientError as err:
             # Re-raise aiohttp.ClientError directly
             raise err
+        except BraiinsPoolAuthError:  # Specific handler to re-raise without logging again
+            raise
+        except BraiinsPoolApiException:  # Specific handler to re-raise without logging again
+            raise
         except Exception as err:
             self._LOGGER.error(
                 "An unexpected error occurred during API request to %s: %s", url,

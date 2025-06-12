@@ -88,6 +88,10 @@ class BraiinsPoolApiClient:
         except aiohttp.ClientError as err:
             # Re-raise aiohttp.ClientError directly
             raise err
+        except BraiinsPoolAuthError:  # Specific handler to re-raise without logging again
+            raise
+        except BraiinsPoolApiException:  # Specific handler to re-raise without logging again
+            raise
         except Exception as err:
             self._LOGGER.error(
                 "An unexpected error occurred during API request to %s: %s", url,

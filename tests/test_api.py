@@ -24,11 +24,15 @@ async def api_client_fixture():
     return client, mock_session, api_key
 
 class JustAMockResponse:
-    def __init__(self, status=200, json_data=None, text_data="", message="", raise_json_error_type=None): # Add raise_json_error_type
+    def __init__(self, status=200, json_data=None, text_data="", message="", raise_json_error_type=None, headers=None): # Add raise_json_error_type
         self.status = status
         self._json_data = json_data if json_data is not None else {}
-        self._text_data = text_data
+        if json_data is not None and text_data == "":
+            self._text_data = json.dumps(json_data)
+        else:
+            self._text_data = text_data
         self.message = message
+        self.headers = headers or {} # Add headers attribute
         self._raise_json_error_type = raise_json_error_type # Store it
         self.raise_for_status = MagicMock()
         if status >= 400:
@@ -67,8 +71,8 @@ class JustAMockResponse:
     async def __aexit__(self, exc_type, exc, tb):
         return None
 
-def mock_response_factory(status=200, json_data=None, text_data="", message="", raise_json_error_type=None): # Add raise_json_error_type
-    return JustAMockResponse(status=status, json_data=json_data, text_data=text_data, message=message, raise_json_error_type=raise_json_error_type) # Pass it
+def mock_response_factory(status=200, json_data=None, text_data="", message="", raise_json_error_type=None, headers=None): # Add raise_json_error_type
+    return JustAMockResponse(status=status, json_data=json_data, text_data=text_data, message=message, raise_json_error_type=raise_json_error_type, headers=headers) # Pass it
 
 @patch("custom_components.braiins_pool.api.BraiinsPoolApiClient._LOGGER")
 async def test_get_account_stats_success(mock_logger, api_client_fixture):
@@ -104,7 +108,7 @@ async def test_request_returns_non_json_response_content_type_error(mock_logger,
         await api_client.get_account_stats()
 
     assert "API returned non-JSON response" in str(excinfo.value)
-    assert "status: 200" in str(excinfo.value)
+    assert "Status: 200" in str(excinfo.value)  # Changed to capital S
     assert "<html><body>Error</body></html>"[:100] in str(excinfo.value) # Check if part of the text is in the exception
 
     mock_logger.error.assert_called_once()
@@ -131,7 +135,7 @@ async def test_request_returns_non_json_response_json_decode_error(mock_logger, 
         await api_client.get_account_stats()
 
     assert "API returned non-JSON response" in str(excinfo.value)
-    assert "status: 200" in str(excinfo.value)
+    assert "Status: 200" in str(excinfo.value)  # Changed to capital S
     assert "{malformed_json"[:100] in str(excinfo.value)
 
     # Check for debug logs

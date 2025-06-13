@@ -62,7 +62,7 @@ class BraiinsDataUpdateCoordinator(DataUpdateCoordinator[dict]):
                     today_reward_str,
                 )
                 processed_data["today_reward"] = 0.0
-
+"""
             user_profile_data = await self.api_client.get_user_profile()
             daily_hashrate_data = await self.api_client.get_daily_hashrate()
 
@@ -102,7 +102,7 @@ class BraiinsDataUpdateCoordinator(DataUpdateCoordinator[dict]):
                 _LOGGER.error("Error parsing daily hashrate data: %s", e)
                 # Set default values and continue
                 processed_data["pool_5m_hash_rate"] = 0.0
-
+"""
             return processed_data
         except Exception as err:  # Catch any exception during fetching or processing
             _LOGGER.error(

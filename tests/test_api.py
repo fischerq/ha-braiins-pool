@@ -84,7 +84,7 @@ async def test_get_account_stats_success(mock_logger, api_client_fixture):
 
     mock_session.get.assert_called_once_with(
         "https://pool.braiins.com/stats/json/btc",
-        headers={"Pool-Auth-Token": api_key},
+        headers={"Pool-Auth-Token": api_key, "Accept": "application/json"},
     )
     assert data == mock_data
     mock_logger.debug.assert_called()
@@ -167,7 +167,7 @@ async def test_get_account_stats_401(mock_logger, api_client_fixture):
 
     mock_session.get.assert_called_once_with(
         "https://pool.braiins.com/stats/json/btc",
-        headers={"Pool-Auth-Token": api_key},
+        headers={"Pool-Auth-Token": api_key, "Accept": "application/json"},
     )
     mock_response_obj.raise_for_status.assert_called_once()
     mock_logger.error.assert_called()
@@ -198,7 +198,7 @@ async def test_get_daily_rewards_success(mock_logger, api_client_fixture):
     data = await api_client.get_daily_rewards()
     mock_session.get.assert_called_once_with(
         "https://pool.braiins.com/accounts/rewards/json/btc",
-        headers={"Pool-Auth-Token": api_key},
+        headers={"Pool-Auth-Token": api_key, "Accept": "application/json"},
     )
     assert data == mock_data
     mock_logger.debug.assert_called()
@@ -214,7 +214,7 @@ async def test_get_daily_rewards_401(mock_logger, api_client_fixture):
 
     mock_session.get.assert_called_once_with(
         "https://pool.braiins.com/accounts/rewards/json/btc",
-        headers={"Pool-Auth-Token": api_key},
+        headers={"Pool-Auth-Token": api_key, "Accept": "application/json"},
     )
     mock_response_obj.raise_for_status.assert_called_once()
     mock_logger.error.assert_called()
@@ -231,7 +231,7 @@ async def test_get_daily_rewards_client_error(mock_logger, api_client_fixture):
 
     assert "Network issue" in str(excinfo.value)
     mock_session.get.assert_called_once_with(
-        expected_url, headers={"Pool-Auth-Token": api_key}
+        expected_url, headers={"Pool-Auth-Token": api_key, "Accept": "application/json"}
     )
     mock_logger.debug.assert_called()
     mock_logger.error.assert_not_called()
@@ -245,7 +245,7 @@ async def test_get_user_profile_success(mock_logger, api_client_fixture):
     data = await api_client.get_user_profile()
     mock_session.get.assert_called_once_with(
         "https://pool.braiins.com/accounts/profile/json/btc/",
-        headers={"Pool-Auth-Token": api_key},
+        headers={"Pool-Auth-Token": api_key, "Accept": "application/json"},
     )
     assert data == mock_data
     mock_logger.debug.assert_called()
@@ -258,7 +258,7 @@ async def test_get_daily_hashrate_success(mock_logger, api_client_fixture):
     data = await api_client.get_daily_hashrate()
     mock_session.get.assert_called_once_with(
         "https://pool.braiins.com/accounts/hash_rate_daily/json/user/btc",
-        headers={"Pool-Auth-Token": api_key},
+        headers={"Pool-Auth-Token": api_key, "Accept": "application/json"},
     )
     assert data == mock_data
     mock_logger.debug.assert_called()
@@ -273,7 +273,7 @@ async def test_get_block_rewards_success(mock_logger, api_client_fixture):
     data = await api_client.get_block_rewards(from_date, to_date)
     mock_session.get.assert_called_once_with(
         f"https://pool.braiins.com/accounts/block_rewards/json/btc?from={from_date}&to={to_date}",
-        headers={"Pool-Auth-Token": api_key},
+        headers={"Pool-Auth-Token": api_key, "Accept": "application/json"},
     )
     assert data == mock_data
     mock_logger.debug.assert_called()
@@ -286,7 +286,7 @@ async def test_get_workers_success(mock_logger, api_client_fixture):
     data = await api_client.get_workers()
     mock_session.get.assert_called_once_with(
         "https://pool.braiins.com/accounts/workers/json/btc/",
-        headers={"Pool-Auth-Token": api_key},
+        headers={"Pool-Auth-Token": api_key, "Accept": "application/json"},
     )
     assert data == mock_data
     mock_logger.debug.assert_called()
@@ -301,7 +301,7 @@ async def test_get_payouts_success(mock_logger, api_client_fixture):
     data = await api_client.get_payouts(from_date, to_date)
     mock_session.get.assert_called_once_with(
         f"https://pool.braiins.com/accounts/payouts/json/btc?from={from_date}&to={to_date}",
-        headers={"Pool-Auth-Token": api_key},
+        headers={"Pool-Auth-Token": api_key, "Accept": "application/json"},
     )
     assert data == mock_data
     mock_logger.debug.assert_called()

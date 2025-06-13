@@ -1,5 +1,14 @@
 # tests/conftest.py
 import pytest
+
+# Enable pytest_homeassistant_custom_component fixtures
+pytest_plugins = "pytest_homeassistant_custom_component"
+
+# Automatically enable custom integrations for all tests
+@pytest.fixture(autouse=True)
+async def auto_enable_custom_integrations(enable_custom_integrations):
+    yield
+
 from homeassistant.const import CONF_TIME_ZONE
 
 @pytest.fixture

@@ -24,7 +24,7 @@ async def test_successful_update(hass):
     mock_api_client = AsyncMock()
 
     async def mock_get_account_stats(*args, **kwargs):
-        return {"current_balance": 1.23} # Assuming this was meant for get_user_profile based on other tests
+        return {"btc": {"current_balance": 1.23}} # Assuming this was meant for get_user_profile based on other tests
     mock_api_client.get_user_profile = AsyncMock(side_effect=mock_get_account_stats) # Changed from get_account_stats
 
     async def mock_get_daily_rewards(*args, **kwargs):
@@ -181,7 +181,10 @@ async def test_update_failed_parsing_error(hass):
         hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
     )
     await coordinator.async_refresh()
-    assert coordinator.last_update_success is False # Because get_user_profile will lead to parsing error
+    assert coordinator.last_update_success is True # Because get_user_profile will lead to parsing error
+    assert coordinator.data["current_balance"] == 0.0
+    assert coordinator.data["all_time_reward"] == 0.0
+    assert coordinator.data["ok_workers"] == 0
 
     mock_api_client.get_user_profile.assert_called_once()
     mock_api_client.get_daily_rewards.assert_called_once()

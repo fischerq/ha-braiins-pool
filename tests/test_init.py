@@ -44,7 +44,7 @@ async def test_async_setup_entry(
     await hass.async_block_till_done()
 
     assert success is True
-    MockBraiinsPoolApiClient.assert_called_once_with(MOCK_API_KEY, async_get_clientsession(hass))
+    MockBraiinsPoolApiClient.assert_called_once_with(async_get_clientsession(hass), MOCK_API_KEY)
 
     # Check that coordinator is created and stored
     assert MOCK_ENTRY_ID in hass.data[DOMAIN]

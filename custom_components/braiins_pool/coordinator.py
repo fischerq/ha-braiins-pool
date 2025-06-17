@@ -2,7 +2,7 @@
 
 import asyncio
 import logging
-import decimal
+
 
 import aiohttp
 
@@ -10,6 +10,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from datetime import timedelta, datetime, timezone
+from decimal import Decimal 
 
 from .const import (
     DOMAIN,

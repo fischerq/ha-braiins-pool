@@ -22,7 +22,7 @@ SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
         name="Braiins Pool Today's Reward",
         icon="mdi:bitcoin",
         native_unit_of_measurement="BTC",
-        state_class=SensorStateClass.TOTAL_INCREASING,
+        state_class=SensorStateClass.TOTAL,
         device_class=SensorDeviceClass.MONETARY,
     ),
     SensorEntityDescription(
@@ -30,7 +30,7 @@ SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
         name="Braiins Pool Current Balance",
         icon="mdi:wallet-outline",
         native_unit_of_measurement="BTC",
-        state_class=SensorStateClass.MEASUREMENT,
+        state_class=SensorStateClass.TOTAL,
         device_class=SensorDeviceClass.MONETARY,
     ),
     SensorEntityDescription(
@@ -38,7 +38,7 @@ SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
         name="Braiins Pool All Time Reward",
         icon="mdi:medal-outline",
         native_unit_of_measurement="BTC",
-        state_class=SensorStateClass.TOTAL_INCREASING,
+        state_class=SensorStateClass.TOTAL,
         device_class=SensorDeviceClass.MONETARY,
     ),
     SensorEntityDescription(

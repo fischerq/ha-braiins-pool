@@ -104,3 +104,27 @@ async def test_sensor_keyerror_fix(hass: HomeAssistant, mock_coordinator, mock_c
 
     async_add_entities_mock.assert_called_once()
     # Further assertions can be made on the entities passed to async_add_entities_mock if needed
+
+@pytest.mark.usefixtures() # Attempt to declare no fixtures are needed
+def test_sensor_types_attributes():
+    """Test the attributes of SENSOR_TYPES."""
+    from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
+
+    monetary_sensors = ["today_reward", "current_balance", "all_time_reward"]
+
+    for description in SENSOR_TYPES:
+        if description.key in monetary_sensors:
+            assert description.device_class == SensorDeviceClass.MONETARY, f"Sensor {description.key} should have MONETARY device class"
+            assert description.state_class == SensorStateClass.TOTAL, f"Sensor {description.key} should have TOTAL state class"
+        else:
+            # Example for other sensors, adjust as needed if specific assertions are required
+            if description.key == "pool_5m_hash_rate":
+                assert description.device_class == SensorDeviceClass.DATA_RATE, f"Sensor {description.key} should have DATA_RATE device class"
+                assert description.state_class == SensorStateClass.MEASUREMENT, f"Sensor {description.key} should have MEASUREMENT state class"
+            elif description.key == "ok_workers":
+                # Assuming no specific device_class for ok_workers, so only check state_class
+                assert description.state_class == SensorStateClass.MEASUREMENT, f"Sensor {description.key} should have MEASUREMENT state class"
+
+            # General assertion for non-monetary sensors if they shouldn't be MONETARY/TOTAL
+            assert description.device_class != SensorDeviceClass.MONETARY if description.device_class else True, f"Sensor {description.key} should not have MONETARY device class"
+            assert description.state_class != SensorStateClass.TOTAL if description.state_class else True, f"Sensor {description.key} should not have TOTAL state class"

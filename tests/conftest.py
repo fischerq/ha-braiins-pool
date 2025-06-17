@@ -9,13 +9,12 @@ pytest_plugins = "pytest_homeassistant_custom_component"
 async def auto_enable_custom_integrations(enable_custom_integrations):
     yield
 
-from homeassistant.const import CONF_TIME_ZONE
-
+# The hass_config fixture is used by pytest-homeassistant-custom-component
+# to configure the Home Assistant instance before it's fully set up.
+# We provide "UTC" as the time_zone, which should be universally available.
 @pytest.fixture
 def hass_config():
-    # Attempt to set the timezone to UTC very early in the hass setup.
-    # This might prevent pytest-homeassistant-custom-component
-    # from erroring out when it tries to set "US/Pacific".
+    """Provide configuration for the Home Assistant Core instance."""
     return {
-        CONF_TIME_ZONE: "UTC"
+        "time_zone": "UTC"
     }

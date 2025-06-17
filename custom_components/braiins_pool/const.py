@@ -17,3 +17,4 @@ API_URL_WORKERS = "https://pool.braiins.com/accounts/workers/json/{}/"
 API_URL_PAYOUTS = "https://pool.braiins.com/accounts/payouts/json/{}?from={}&to={}"
 
 DEFAULT_COIN = "btc"
+SATOSHIS_PER_BTC = 100000000

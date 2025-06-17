@@ -55,6 +55,30 @@ SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
         icon="mdi:worker",
         state_class=SensorStateClass.MEASUREMENT,
     ),
+    SensorEntityDescription(
+        key="today_reward_satoshi",
+        name="Braiins Pool Today's Reward Satoshi",
+        icon="mdi:bitcoin",
+        native_unit_of_measurement="Satoshi",
+        state_class=SensorStateClass.TOTAL,
+        device_class=SensorDeviceClass.MONETARY,
+    ),
+    SensorEntityDescription(
+        key="current_balance_satoshi",
+        name="Braiins Pool Current Balance Satoshi",
+        icon="mdi:wallet-outline",
+        native_unit_of_measurement="Satoshi",
+        state_class=SensorStateClass.TOTAL,
+        device_class=SensorDeviceClass.MONETARY,
+    ),
+    SensorEntityDescription(
+        key="all_time_reward_satoshi",
+        name="Braiins Pool All Time Reward Satoshi",
+        icon="mdi:medal-outline",
+        native_unit_of_measurement="Satoshi",
+        state_class=SensorStateClass.TOTAL,
+        device_class=SensorDeviceClass.MONETARY,
+    ),
 )
 
 

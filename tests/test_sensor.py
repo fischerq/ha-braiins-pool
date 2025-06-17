@@ -1,12 +1,16 @@
 import pytest
 from unittest.mock import MagicMock, patch
 
+import pytest
+from unittest.mock import MagicMock, patch
+
 from homeassistant.core import HomeAssistant
 from homeassistant.const import CONF_API_KEY
 from homeassistant.helpers.entity_component import async_update_entity # For potential future use
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass # Module level import
 
-from custom_components.braiins_pool.const import DOMAIN, CONF_REWARDS_ACCOUNT_NAME
+from custom_components.braiins_pool.const import DOMAIN, CONF_REWARDS_ACCOUNT_NAME, SATOSHIS_PER_BTC
 from custom_components.braiins_pool.sensor import SENSOR_TYPES, BraiinsPoolSensor
 from custom_components.braiins_pool.coordinator import BraiinsDataUpdateCoordinator
 
@@ -33,6 +37,9 @@ def mock_coordinator(hass, mock_config_entry_data):
         "all_time_reward": 1.23,
         "pool_5m_hash_rate": 5000,
         "ok_workers": 2,
+        "today_reward_satoshi": 100000, # 0.001 * SATOSHIS_PER_BTC
+        "current_balance_satoshi": 5000000, # 0.05 * SATOSHIS_PER_BTC
+        "all_time_reward_satoshi": 123000000, # 1.23 * SATOSHIS_PER_BTC
     }
     coordinator.config_entry = MagicMock(spec=ConfigEntry)
     coordinator.config_entry.data = mock_config_entry_data
@@ -105,26 +112,33 @@ async def test_sensor_keyerror_fix(hass: HomeAssistant, mock_coordinator, mock_c
     async_add_entities_mock.assert_called_once()
     # Further assertions can be made on the entities passed to async_add_entities_mock if needed
 
-@pytest.mark.usefixtures() # Attempt to declare no fixtures are needed
+@pytest.mark.usefixtures()
 def test_sensor_types_attributes():
-    """Test the attributes of SENSOR_TYPES."""
-    from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
+    """Test the attributes of SENSOR_TYPES, including new Satoshi sensors."""
+    # SensorDeviceClass and SensorStateClass are now imported at module level
 
-    monetary_sensors = ["today_reward", "current_balance", "all_time_reward"]
+    monetary_btc_sensors = ["today_reward", "current_balance", "all_time_reward"]
+    monetary_satoshi_sensors = ["today_reward_satoshi", "current_balance_satoshi", "all_time_reward_satoshi"]
 
     for description in SENSOR_TYPES:
-        if description.key in monetary_sensors:
+        if description.key in monetary_btc_sensors:
             assert description.device_class == SensorDeviceClass.MONETARY, f"Sensor {description.key} should have MONETARY device class"
             assert description.state_class == SensorStateClass.TOTAL, f"Sensor {description.key} should have TOTAL state class"
+            assert description.native_unit_of_measurement == "BTC", f"Sensor {description.key} should have BTC unit"
+        elif description.key in monetary_satoshi_sensors:
+            assert description.device_class == SensorDeviceClass.MONETARY, f"Sensor {description.key} should have MONETARY device class"
+            assert description.state_class == SensorStateClass.TOTAL, f"Sensor {description.key} should have TOTAL state class"
+            assert description.native_unit_of_measurement == "Satoshi", f"Sensor {description.key} should have Satoshi unit"
+        elif description.key == "pool_5m_hash_rate":
+            assert description.device_class == SensorDeviceClass.DATA_RATE, f"Sensor {description.key} should have DATA_RATE device class"
+            assert description.state_class == SensorStateClass.MEASUREMENT, f"Sensor {description.key} should have MEASUREMENT state class"
+        elif description.key == "ok_workers":
+            assert description.state_class == SensorStateClass.MEASUREMENT, f"Sensor {description.key} should have MEASUREMENT state class"
+            # Assuming no specific device_class for ok_workers
+            assert description.device_class is None, f"Sensor {description.key} should have None device class"
         else:
-            # Example for other sensors, adjust as needed if specific assertions are required
-            if description.key == "pool_5m_hash_rate":
-                assert description.device_class == SensorDeviceClass.DATA_RATE, f"Sensor {description.key} should have DATA_RATE device class"
-                assert description.state_class == SensorStateClass.MEASUREMENT, f"Sensor {description.key} should have MEASUREMENT state class"
-            elif description.key == "ok_workers":
-                # Assuming no specific device_class for ok_workers, so only check state_class
-                assert description.state_class == SensorStateClass.MEASUREMENT, f"Sensor {description.key} should have MEASUREMENT state class"
-
-            # General assertion for non-monetary sensors if they shouldn't be MONETARY/TOTAL
-            assert description.device_class != SensorDeviceClass.MONETARY if description.device_class else True, f"Sensor {description.key} should not have MONETARY device class"
-            assert description.state_class != SensorStateClass.TOTAL if description.state_class else True, f"Sensor {description.key} should not have TOTAL state class"
+            # General assertion for any other sensors if they shouldn't be MONETARY/TOTAL
+            if description.device_class: # only assert if device_class is not None
+                 assert description.device_class != SensorDeviceClass.MONETARY, f"Sensor {description.key} should not have MONETARY device class unless specified"
+            if description.state_class: # only assert if state_class is not None
+                 assert description.state_class != SensorStateClass.TOTAL, f"Sensor {description.key} should not have TOTAL state class unless specified"

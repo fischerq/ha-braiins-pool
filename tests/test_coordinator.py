@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock
 
 from aiohttp import ClientError
 from custom_components.braiins_pool.coordinator import BraiinsDataUpdateCoordinator
-from custom_components.braiins_pool.const import DEFAULT_SCAN_INTERVAL
+from custom_components.braiins_pool.const import DEFAULT_SCAN_INTERVAL, SATOSHIS_PER_BTC
 # from homeassistant.helpers.update_coordinator import UpdateFailed # Not explicitly used in asserts, can remove if not needed for other reasons
 
 from freezegun import freeze_time
@@ -59,24 +59,27 @@ async def test_successful_update(hass):
 
     assert coordinator.data["today_reward"] == 0.123
     assert coordinator.data["current_balance"] == 1.23
+    # Assuming SATOSHIS_PER_BTC is 100_000_000
+    assert coordinator.data["today_reward_satoshi"] == 12300000
+    assert coordinator.data["current_balance_satoshi"] == 123000000
 
 
 @pytest.mark.asyncio
 @freeze_time("2023-10-08 12:00:00")
 async def test_successful_update_with_new_data(hass):
-    """Test successful data update including new endpoints."""
+    """Test successful data update including new endpoints and satoshi conversions."""
     mock_api_client = AsyncMock()
 
     async def mock_get_daily_rewards(*args, **kwargs):
-        return {"btc": {"daily_rewards": [{"total_reward": "0.123"}]}}
+        return {"btc": {"daily_rewards": [{"total_reward": "0.00000001"}]}} # 1 satoshi
     mock_api_client.get_daily_rewards = AsyncMock(side_effect=mock_get_daily_rewards)
 
     async def mock_get_user_profile(*args, **kwargs):
-        return {"btc": {"current_balance": 4.56, "all_time_reward": 7.89, "ok_workers": 10}}
+        return {"btc": {"current_balance": 2.50000000, "all_time_reward": 10.12345678, "ok_workers": 10}}
     mock_api_client.get_user_profile = AsyncMock(side_effect=mock_get_user_profile)
 
     async def mock_get_daily_hashrate(*args, **kwargs):
-        return {"test_hash_key": "daily_hashrate_data"} # Changed "test" to "test_hash_key" for clarity
+        return {"test_hash_key": "daily_hashrate_data"}
     mock_api_client.get_daily_hashrate = AsyncMock(side_effect=mock_get_daily_hashrate)
 
     async def mock_get_block_rewards(*args, **kwargs):
@@ -103,12 +106,18 @@ async def test_successful_update_with_new_data(hass):
     mock_api_client.get_workers.assert_called_once()
     mock_api_client.get_payouts.assert_called_once_with('2023-10-01', '2023-10-08')
 
-    assert coordinator.data["today_reward"] == 0.123
-    assert coordinator.data["current_balance"] == 4.56
-    assert coordinator.data["all_time_reward"] == 7.89
+    assert coordinator.data["today_reward"] == 0.00000001
+    assert coordinator.data["today_reward_satoshi"] == 1
+
+    assert coordinator.data["current_balance"] == 2.5
+    assert coordinator.data["current_balance_satoshi"] == 250000000
+
+    assert coordinator.data["all_time_reward"] == 10.12345678
+    assert coordinator.data["all_time_reward_satoshi"] == 1012345678
+
     assert coordinator.data["ok_workers"] == 10
 
-    assert coordinator.data["user_profile_data"]["btc"]["current_balance"] == 4.56
+    assert coordinator.data["user_profile_data"]["btc"]["current_balance"] == 2.5
     assert coordinator.data["daily_hashrate_data"]["test_hash_key"] == "daily_hashrate_data"
     # assert "pool_5m_hash_rate" in coordinator.data # This depends on processing logic in coordinator
     assert coordinator.data["block_rewards_data"]["test_block_key"] == "block_rewards_data"
@@ -275,4 +284,12 @@ async def test_update_failed_missing_new_data_keys(hass):
     # assert coordinator.data["pool_5m_hash_rate"] == 0.0 # Depends on how it's processed
 
     assert coordinator.data["today_reward"] == 0.123
+    assert coordinator.data["today_reward_satoshi"] == 12300000 # 0.123 * 100_000_000
+
     assert coordinator.data["current_balance"] == 4.56
+    assert coordinator.data["current_balance_satoshi"] == 456000000 # 4.56 * 100_000_000
+
+    # For all_time_reward and ok_workers, they are set to 0.0 and 0 if keys are missing
+    assert coordinator.data["all_time_reward"] == 0.0
+    assert coordinator.data["all_time_reward_satoshi"] == 0
+    assert coordinator.data["ok_workers"] == 0

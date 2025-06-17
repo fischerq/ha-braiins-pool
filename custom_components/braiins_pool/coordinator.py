@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import decimal
 
 import aiohttp
 
@@ -55,25 +56,19 @@ class BraiinsDataUpdateCoordinator(DataUpdateCoordinator[dict]):
                 .get("daily_rewards", [{}])[0]
                 .get("total_reward", "0")
             )
+            today_reward_decimal = Decimal(today_reward_str)
             try:
-                processed_data["today_reward"] = float(today_reward_str)
+                processed_data["today_reward"] = float(today_reward_decimal)
+                processed_data["today_reward_satoshi"] = int(today_reward_decimal * SATOSHIS_PER_BTC)
             except (ValueError, KeyError, IndexError):
                 _LOGGER.warning(
                     "Could not convert daily reward '%s' to float or access the data. Setting to 0.",
                     today_reward_str,
                 )
                 processed_data["today_reward"] = 0.0
-            # Convert to satoshi
-            if processed_data["today_reward"] is not None:
-                try:
-                    processed_data["today_reward_satoshi"] = int(processed_data["today_reward"] * SATOSHIS_PER_BTC)
-                except TypeError:
-                    _LOGGER.warning("Cannot convert today_reward to satoshi, value is None.")
-                    processed_data["today_reward_satoshi"] = 0
-            else:
                 processed_data["today_reward_satoshi"] = 0
 
-            user_profile_data = await self.api_client.get_user_profile()
+#            user_profile_data = await self.api_client.get_user_profile()
 #            daily_hashrate_data = await self.api_client.get_daily_hashrate()
 
 #            # Fetch block rewards and payouts for the last 7 days
@@ -89,37 +84,37 @@ class BraiinsDataUpdateCoordinator(DataUpdateCoordinator[dict]):
 #            processed_data["workers_data"] = workers_data
 
             # Process data from fetched endpoints
-            processed_data["user_profile_data"] = user_profile_data # Keep raw data as well
+#            processed_data["user_profile_data"] = user_profile_data # Keep raw data as well
 #            processed_data["daily_hashrate_data"] = daily_hashrate_data # Keep raw data as well
 #            processed_data["block_rewards_data"] = block_rewards_data # Keep raw data as well
 #            processed_data["payouts_data"] = payouts_data # Keep raw data as well
 
-            # Extract and process specific data points
-            try:
-                current_balance_btc = float(user_profile_data.get("btc", {}).get("current_balance", 0.0))
-                all_time_reward_btc = float(user_profile_data.get("btc", {}).get("all_time_reward", 0.0))
-                processed_data["current_balance"] = current_balance_btc
-                processed_data["all_time_reward"] = all_time_reward_btc
-                processed_data["ok_workers"] = int(user_profile_data.get("btc", {}).get("ok_workers", 0))
-
-                if current_balance_btc is not None:
-                    processed_data["current_balance_satoshi"] = int(current_balance_btc * SATOSHIS_PER_BTC)
-                else:
-                    processed_data["current_balance_satoshi"] = 0
-
-                if all_time_reward_btc is not None:
-                    processed_data["all_time_reward_satoshi"] = int(all_time_reward_btc * SATOSHIS_PER_BTC)
-                else:
-                    processed_data["all_time_reward_satoshi"] = 0
-
-            except (ValueError, TypeError, KeyError) as e:
-                _LOGGER.error("Error parsing user profile data: %s", e)
-                # Set default values and continue
-                processed_data["current_balance"] = 0.0
-                processed_data["all_time_reward"] = 0.0
-                processed_data["ok_workers"] = 0
-                processed_data["current_balance_satoshi"] = 0
-                processed_data["all_time_reward_satoshi"] = 0
+#            # Extract and process specific data points
+#            try:
+ #               current_balance_btc = float(user_profile_data.get("btc", {}).get("current_balance", 0.0))
+ #               all_time_reward_btc = float(user_profile_data.get("btc", {}).get("all_time_reward", 0.0))
+ #               processed_data["current_balance"] = current_balance_btc
+ #               processed_data["all_time_reward"] = all_time_reward_btc
+ #               processed_data["ok_workers"] = int(user_profile_data.get("btc", {}).get("ok_workers", 0))
+#
+#                if current_balance_btc is not None:
+#                    processed_data["current_balance_satoshi"] = int(current_balance_btc * SATOSHIS_PER_BTC)
+#                else:
+#                    processed_data["current_balance_satoshi"] = 0
+#
+#                if all_time_reward_btc is not None:
+#                    processed_data["all_time_reward_satoshi"] = int(all_time_reward_btc * SATOSHIS_PER_BTC)
+#                else:
+#                    processed_data["all_time_reward_satoshi"] = 0
+#
+#            except (ValueError, TypeError, KeyError) as e:
+#                _LOGGER.error("Error parsing user profile data: %s", e)
+#                # Set default values and continue
+#                processed_data["current_balance"] = 0.0
+#                processed_data["all_time_reward"] = 0.0
+#                processed_data["ok_workers"] = 0
+#                processed_data["current_balance_satoshi"] = 0
+#                processed_data["all_time_reward_satoshi"] = 0
 #
 #            try:
 #                 processed_data["pool_5m_hash_rate"] = float(daily_hashrate_data.get("btc", {}).get("pool_5m_hash_rate", 0.0))

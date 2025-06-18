@@ -2,7 +2,7 @@
 
 import logging
 import aiohttp
-import json # Add this import at the top of the file
+import json  # Add this import at the top of the file
 
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
@@ -88,13 +88,18 @@ class BraiinsPoolApiClient:
         except aiohttp.ClientError as err:
             # Re-raise aiohttp.ClientError directly
             raise err
-        except BraiinsPoolAuthError:  # Specific handler to re-raise without logging again
+        except (
+            BraiinsPoolAuthError
+        ):  # Specific handler to re-raise without logging again
             raise
-        except BraiinsPoolApiException:  # Specific handler to re-raise without logging again
+        except (
+            BraiinsPoolApiException
+        ):  # Specific handler to re-raise without logging again
             raise
         except Exception as err:
             self._LOGGER.error(
-                "An unexpected error occurred during API request to %s: %s", url,
+                "An unexpected error occurred during API request to %s: %s",
+                url,
                 err,
             )
             raise err

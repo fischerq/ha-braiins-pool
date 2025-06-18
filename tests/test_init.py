@@ -14,6 +14,7 @@ MOCK_API_KEY = "test_api_key_456"
 MOCK_REWARDS_ACCOUNT_NAME = "My Pool Account"
 MOCK_ENTRY_ID = "mock_entry_1"
 
+
 @pytest.fixture
 def mock_config_entry():
     """Mock a config entry."""
@@ -26,9 +27,15 @@ def mock_config_entry():
         title=MOCK_REWARDS_ACCOUNT_NAME,
     )
 
+
 @patch("custom_components.braiins_pool.BraiinsPoolApiClient")
-@patch("custom_components.braiins_pool.BraiinsDataUpdateCoordinator.async_config_entry_first_refresh", return_value=None) # Mock first refresh
-@patch("homeassistant.config_entries.ConfigEntries.async_forward_entry_setups") # Further mock sensor setup
+@patch(
+    "custom_components.braiins_pool.BraiinsDataUpdateCoordinator.async_config_entry_first_refresh",
+    return_value=None,
+)  # Mock first refresh
+@patch(
+    "homeassistant.config_entries.ConfigEntries.async_forward_entry_setups"
+)  # Further mock sensor setup
 async def test_async_setup_entry(
     mock_forward_setup,
     mock_first_refresh,
@@ -44,7 +51,9 @@ async def test_async_setup_entry(
     await hass.async_block_till_done()
 
     assert success is True
-    MockBraiinsPoolApiClient.assert_called_once_with(async_get_clientsession(hass), MOCK_API_KEY)
+    MockBraiinsPoolApiClient.assert_called_once_with(
+        async_get_clientsession(hass), MOCK_API_KEY
+    )
 
     # Check that coordinator is created and stored
     assert MOCK_ENTRY_ID in hass.data[DOMAIN]
@@ -65,7 +74,7 @@ async def test_async_unload_entry(
     """Test successful unload of the integration."""
     # Pre-populate hass.data as if setup was successful
     hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][mock_config_entry.entry_id] = MagicMock() # Mock coordinator
+    hass.data[DOMAIN][mock_config_entry.entry_id] = MagicMock()  # Mock coordinator
     mock_unload_platforms.return_value = True
 
     success = await async_unload_entry(hass, mock_config_entry)

@@ -11,11 +11,15 @@ from custom_components.braiins_pool.const import DOMAIN, CONF_REWARDS_ACCOUNT_NA
 MOCK_API_KEY = "test_api_key_123"
 MOCK_REWARDS_ACCOUNT_NAME = "My Test Account"
 
+
 @pytest.fixture(autouse=True)
 def mock_setup_entry():
     """Mock async_setup_entry to bypass actual setup."""
-    with patch("custom_components.braiins_pool.async_setup_entry", return_value=True) as mock_setup:
+    with patch(
+        "custom_components.braiins_pool.async_setup_entry", return_value=True
+    ) as mock_setup:
         yield mock_setup
+
 
 async def test_config_flow_user_step(hass: HomeAssistant):
     """Test the user config flow."""
@@ -61,6 +65,7 @@ async def test_config_flow_empty_api_key(hass: HomeAssistant):
     assert result2["type"] == data_entry_flow.RESULT_TYPE_FORM
     assert result2["errors"]["base"] == "invalid_api_key"
 
+
 async def test_config_flow_empty_rewards_name(hass: HomeAssistant):
     """Test config flow with an empty rewards account name."""
     result = await hass.config_entries.flow.async_init(
@@ -76,13 +81,17 @@ async def test_config_flow_empty_rewards_name(hass: HomeAssistant):
     assert result2["type"] == data_entry_flow.RESULT_TYPE_FORM
     assert result2["errors"]["base"] == "invalid_rewards_account_name"
 
+
 async def test_config_flow_already_configured(hass: HomeAssistant):
     """Test config flow when an entry with the same unique ID (rewards account name) already exists."""
     # Create a mock entry first
     mock_entry = MockConfigEntry(
         domain=DOMAIN,
         unique_id=MOCK_REWARDS_ACCOUNT_NAME,
-        data={CONF_API_KEY: "another_key", CONF_REWARDS_ACCOUNT_NAME: MOCK_REWARDS_ACCOUNT_NAME},
+        data={
+            CONF_API_KEY: "another_key",
+            CONF_REWARDS_ACCOUNT_NAME: MOCK_REWARDS_ACCOUNT_NAME,
+        },
         title=MOCK_REWARDS_ACCOUNT_NAME,
     )
     mock_entry.add_to_hass(hass)
@@ -95,7 +104,7 @@ async def test_config_flow_already_configured(hass: HomeAssistant):
         result["flow_id"],
         {
             CONF_API_KEY: MOCK_API_KEY,
-            CONF_REWARDS_ACCOUNT_NAME: MOCK_REWARDS_ACCOUNT_NAME, # Same name
+            CONF_REWARDS_ACCOUNT_NAME: MOCK_REWARDS_ACCOUNT_NAME,  # Same name
         },
     )
     assert result2["type"] == data_entry_flow.RESULT_TYPE_ABORT

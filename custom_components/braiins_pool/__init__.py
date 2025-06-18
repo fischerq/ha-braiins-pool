@@ -10,6 +10,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .coordinator import BraiinsDataUpdateCoordinator
 from .api import BraiinsPoolApiClient
 from .const import DOMAIN, CONF_API_KEY
+
 # from .config_flow import BraiinsPoolConfigFlow
 
 _LOGGER = logging.getLogger(__name__)

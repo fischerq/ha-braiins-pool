@@ -5,9 +5,9 @@
     "@fischerq"
   ],
   "config_flow": true,
-  "documentation": "https://github.com/fischerq/homeassistant-braiins-pool",
+  "documentation": "https://github.com/fischerq/ha-braiins-pool",
   "iot_class": "cloud_polling",
-  "issue_tracker": "https://github.com/fischerq/homeassistant-braiins-pool/issues",
+  "issue_tracker": "https://github.com/fischerq/ha-braiins-pool/issues",
   "requirements": [
     "aiohttp"
   ],

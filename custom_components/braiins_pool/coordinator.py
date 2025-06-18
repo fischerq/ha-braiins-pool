@@ -110,14 +110,14 @@ class BraiinsDataUpdateCoordinator(DataUpdateCoordinator[dict]):
 
                 if current_balance_decimal is not None:
                     processed_data["current_balance_satoshi"] = int(
-                        current_balance_btc * SATOSHIS_PER_BTC
+                        current_balance_decimal * SATOSHIS_PER_BTC
                     )
                 else:
                     processed_data["current_balance_satoshi"] = 0
 
                 if all_time_reward_decimal is not None:
                     processed_data["all_time_reward_satoshi"] = int(
-                        all_time_reward_btc * SATOSHIS_PER_BTC
+                        all_time_reward_decimal * SATOSHIS_PER_BTC
                     )
                 else:
                     processed_data["all_time_reward_satoshi"] = 0

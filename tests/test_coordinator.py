@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock
 from decimal import Decimal
 
 from aiohttp import ClientError
-from homeassistant.helpers.update_coordinator import UpdateFailed # Import UpdateFailed
+from homeassistant.helpers.update_coordinator import UpdateFailed  # Import UpdateFailed
 from custom_components.braiins_pool.coordinator import BraiinsDataUpdateCoordinator
 from custom_components.braiins_pool.const import DEFAULT_SCAN_INTERVAL, SATOSHIS_PER_BTC
 
@@ -48,7 +48,9 @@ async def test_successful_update(hass):
     # today_reward comes from user_profile_data.get("btc", {}).get("today_reward", "0")
     # The mock_get_account_stats returns {"btc": {"current_balance": 1.23}}, so "today_reward" is missing.
     assert coordinator.data["today_reward"] == Decimal("0")
-    assert coordinator.data["current_balance"] == Decimal("1.23") # Ensure Decimal comparison
+    assert coordinator.data["current_balance"] == Decimal(
+        "1.23"
+    )  # Ensure Decimal comparison
     # Assuming SATOSHIS_PER_BTC is 100_000_000
     assert coordinator.data["today_reward_satoshi"] == 0
     assert coordinator.data["current_balance_satoshi"] == 123000000
@@ -60,14 +62,14 @@ async def test_successful_update_with_new_data(hass):
     """Test successful data update including new endpoints and satoshi conversions."""
     mock_api_client = AsyncMock()
 
-    async def mock_get_user_profile_data(*args, **kwargs): # Renamed for clarity
+    async def mock_get_user_profile_data(*args, **kwargs):  # Renamed for clarity
         return {
             "btc": {
-                "current_balance": "2.50000000", # String as per API
-                "all_time_reward": "10.12345678", # String as per API
-                "ok_workers": 10, # Integer
-                "today_reward": "0.00000001", # 1 satoshi, String as per API
-                "hash_rate_5m": "500.0" # String as per API
+                "current_balance": "2.50000000",  # String as per API
+                "all_time_reward": "10.12345678",  # String as per API
+                "ok_workers": 10,  # Integer
+                "today_reward": "0.00000001",  # 1 satoshi, String as per API
+                "hash_rate_5m": "500.0",  # String as per API
             }
         }
 
@@ -94,7 +96,9 @@ async def test_successful_update_with_new_data(hass):
     assert coordinator.data["pool_5m_hash_rate"] == 500.0
 
     # Check that the raw data is stored
-    assert coordinator.data["user_profile_data"]["btc"]["current_balance"] == "2.50000000"
+    assert (
+        coordinator.data["user_profile_data"]["btc"]["current_balance"] == "2.50000000"
+    )
     # Other raw data fields are not fetched by the coordinator, so no need to assert them here
 
 
@@ -109,9 +113,11 @@ async def test_update_failed_api_error(hass):
     coordinator = BraiinsDataUpdateCoordinator(
         hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
     )
-    await coordinator.async_refresh() # Call refresh directly
+    await coordinator.async_refresh()  # Call refresh directly
 
-    assert coordinator.last_update_success is False # This should be true after UpdateFailed is handled
+    assert (
+        coordinator.last_update_success is False
+    )  # This should be true after UpdateFailed is handled
     mock_api_client.get_user_profile.assert_called_once()
 
 
@@ -141,12 +147,11 @@ async def test_update_failed_parsing_error(hass):
     assert coordinator.data["today_reward"] == Decimal("0.0")
     assert coordinator.data["pool_5m_hash_rate"] == 0.0
 
-
     mock_api_client.get_user_profile.assert_called_once()
 
 
 @pytest.mark.asyncio
-async def test_update_user_profile_parsing_error_for_rewards(hass): # Renamed test
+async def test_update_user_profile_parsing_error_for_rewards(hass):  # Renamed test
     "Test data update failure due to user profile parsing error for reward fields."
     mock_api_client = AsyncMock()
 
@@ -154,9 +159,9 @@ async def test_update_user_profile_parsing_error_for_rewards(hass): # Renamed te
         return {
             "btc": {
                 "current_balance": "1.23",
-                "all_time_reward": "not_a_number", # Malformed
+                "all_time_reward": "not_a_number",  # Malformed
                 "ok_workers": 1,
-                "today_reward": {} # Malformed, should be string or number
+                "today_reward": {},  # Malformed, should be string or number
             }
         }
 
@@ -177,7 +182,9 @@ async def test_update_user_profile_parsing_error_for_rewards(hass): # Renamed te
     assert coordinator.data["all_time_reward"] == Decimal("0.0")
     # If today_reward or all_time_reward parsing fails, current_balance will also be default.
     assert coordinator.data["current_balance"] == Decimal("0.0")
-    assert coordinator.data["ok_workers"] == 0 # ok_workers will also default due to the broad exception handling
+    assert (
+        coordinator.data["ok_workers"] == 0
+    )  # ok_workers will also default due to the broad exception handling
 
     mock_api_client.get_user_profile.assert_called_once()
 
@@ -189,7 +196,9 @@ async def test_update_failed_missing_new_data_keys(hass):
 
     async def mock_get_user_profile_missing_keys(*args, **kwargs):
         return {
-            "btc": {"current_balance": "4.56"}  # Missing 'all_time_reward', 'ok_workers', 'today_reward', 'hash_rate_5m'
+            "btc": {
+                "current_balance": "4.56"
+            }  # Missing 'all_time_reward', 'ok_workers', 'today_reward', 'hash_rate_5m'
         }
 
     mock_api_client.get_user_profile = AsyncMock(
@@ -208,15 +217,14 @@ async def test_update_failed_missing_new_data_keys(hass):
     assert coordinator.data["all_time_reward"] == Decimal("0.0")
     assert coordinator.data["all_time_reward_satoshi"] == 0
     assert coordinator.data["ok_workers"] == 0
-    assert coordinator.data["today_reward"] == Decimal("0.0") # Was expecting 0.123 from a different mock
-    assert coordinator.data["today_reward_satoshi"] == 0 # Was expecting 12300000
+    assert coordinator.data["today_reward"] == Decimal(
+        "0.0"
+    )  # Was expecting 0.123 from a different mock
+    assert coordinator.data["today_reward_satoshi"] == 0  # Was expecting 12300000
     assert coordinator.data["pool_5m_hash_rate"] == 0.0
-
 
     # Asserting values that are present
     assert coordinator.data["current_balance"] == Decimal("4.56")
-    assert (
-        coordinator.data["current_balance_satoshi"] == 456000000
-    )
+    assert coordinator.data["current_balance_satoshi"] == 456000000
 
     mock_api_client.get_user_profile.assert_called_once()

@@ -235,7 +235,7 @@ async def test_get_account_stats_other_error(mock_logger, api_client_fixture):
 
     mock_session.get.assert_called_once_with(
         "https://pool.braiins.com/stats/json/btc",
-        headers={"Pool-Auth-Token": api_key},
+        headers={"Pool-Auth-Token": api_key, "Accept": "application/json"},
     )
     mock_response_obj.raise_for_status.assert_called_once()
     mock_logger.error.assert_called()

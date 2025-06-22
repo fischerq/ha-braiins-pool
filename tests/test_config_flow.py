@@ -2,9 +2,10 @@ import pytest
 from unittest.mock import patch
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from homeassistant import config_entries, data_entry_flow
+from homeassistant import config_entries
 from homeassistant.core import HomeAssistant
 from homeassistant.const import CONF_API_KEY
+from homeassistant.data_entry_flow import FlowResultType
 
 from custom_components.braiins_pool.const import DOMAIN, CONF_REWARDS_ACCOUNT_NAME
 
@@ -26,7 +27,7 @@ async def test_config_flow_user_step(hass: HomeAssistant):
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": config_entries.SOURCE_USER}
     )
-    assert result["type"] == data_entry_flow.RESULT_TYPE_FORM
+    assert result["type"] == FlowResultType.FORM
     assert result["step_id"] == "user"
     assert result["errors"] is None
 
@@ -40,7 +41,7 @@ async def test_config_flow_user_step(hass: HomeAssistant):
     )
     await hass.async_block_till_done()
 
-    assert result2["type"] == data_entry_flow.RESULT_TYPE_CREATE_ENTRY
+    assert result2["type"] == FlowResultType.CREATE_ENTRY
     assert result2["title"] == MOCK_REWARDS_ACCOUNT_NAME
     assert result2["data"] == {
         CONF_API_KEY: MOCK_API_KEY,
@@ -62,7 +63,7 @@ async def test_config_flow_empty_api_key(hass: HomeAssistant):
             CONF_REWARDS_ACCOUNT_NAME: MOCK_REWARDS_ACCOUNT_NAME,
         },
     )
-    assert result2["type"] == data_entry_flow.RESULT_TYPE_FORM
+    assert result2["type"] == FlowResultType.FORM
     assert result2["errors"]["base"] == "invalid_api_key"
 
 
@@ -78,7 +79,7 @@ async def test_config_flow_empty_rewards_name(hass: HomeAssistant):
             CONF_REWARDS_ACCOUNT_NAME: "",
         },
     )
-    assert result2["type"] == data_entry_flow.RESULT_TYPE_FORM
+    assert result2["type"] == FlowResultType.FORM
     assert result2["errors"]["base"] == "invalid_rewards_account_name"
 
 
@@ -107,5 +108,5 @@ async def test_config_flow_already_configured(hass: HomeAssistant):
             CONF_REWARDS_ACCOUNT_NAME: MOCK_REWARDS_ACCOUNT_NAME,  # Same name
         },
     )
-    assert result2["type"] == data_entry_flow.RESULT_TYPE_ABORT
+    assert result2["type"] == FlowResultType.ABORT
     assert result2["reason"] == "already_configured"

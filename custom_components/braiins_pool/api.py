@@ -2,6 +2,7 @@
 
 import logging
 import aiohttp
+import json  # Add this import at the top of the file
 
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
@@ -40,15 +41,33 @@ class BraiinsPoolApiClient:
     async def _request(self, url: str):
         """Helper method to perform API requests."""
         headers = {k: v.format(self._api_key) for k, v in API_HEADERS.items()}
-        self._LOGGER.debug("Making API request to: %s", url)
+        self._LOGGER.debug("Making API request to: %s, Headers: %s", url, headers)
         try:
             # Assume BRAIINS_API_URL is the base URL and the provided url is the endpoint path
             # If BRAIINS_API_URL is the full URL for stats, the daily rewards URL is also a full URL.
             # This needs to be clarified in const.py or handled differently if not consistent.
             # For now, assuming the provided url is the full endpoint URL.
             async with self._session.get(url, headers=headers) as response:
+                self._LOGGER.debug(
+                    "Received API response: Status: %s, Headers: %s",
+                    response.status,
+                    response.headers,
+                )
+                response_text = await response.text()
+                self._LOGGER.debug("API Response Body: %s", response_text)
                 response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
-                return await response.json()
+                try:
+                    return json.loads(response_text)
+                except (aiohttp.ContentTypeError, json.JSONDecodeError) as json_err:
+                    self._LOGGER.error(
+                        "API request to %s returned non-JSON response (status: %s). Response text: %s",
+                        url,
+                        response.status,
+                        response_text,
+                    )
+                    raise BraiinsPoolApiException(
+                        f"API returned non-JSON response. Status: {response.status}, Body: {response_text}"
+                    ) from json_err
         except aiohttp.ClientResponseError as err:
             if (
                 err.status == 403
@@ -57,20 +76,30 @@ class BraiinsPoolApiClient:
                     "Braiins Pool API Authentication Error: Invalid API key or insufficient permissions."
                 )
                 raise BraiinsPoolAuthError("Invalid API key") from err
+            # For other ClientResponseErrors (like 401, 500)
             self._LOGGER.error(
-                "Error fetching account stats from Braiins Pool API: Status %s, %s",
-                response.status,
-                await response.text(),  # Use response.text() for more detailed error info
+                "Error fetching data from Braiins Pool API: Status %s, Message: %s",
+                err.status,
+                err.message,
             )
             raise BraiinsPoolApiException(
-                f"API error {response.status}: {await response.text()}"
+                f"API error {err.status}: {err.message}"
             ) from err
         except aiohttp.ClientError as err:
             # Re-raise aiohttp.ClientError directly
             raise err
+        except (
+            BraiinsPoolAuthError
+        ):  # Specific handler to re-raise without logging again
+            raise
+        except (
+            BraiinsPoolApiException
+        ):  # Specific handler to re-raise without logging again
+            raise
         except Exception as err:
-            _LOGGER.error(
-                "An unexpected error occurred during API request to %s: %s", url,
+            self._LOGGER.error(
+                "An unexpected error occurred during API request to %s: %s",
+                url,
                 err,
             )
             raise err

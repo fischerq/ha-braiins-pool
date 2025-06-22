@@ -10,15 +10,15 @@ This integration is available through HACS (Home Assistant Community Store).
 
 1.  **Add this repository as a Custom Repository in HACS.**
     *   In HACS, go to the Integrations tab.
-    *   Click on the three dots in the top right corner and select "Custom repositories".
-    *   Enter the URL of this repository (`https://github.com/custom-components/homeassistant-braiins-pool` - replace with the actual URL if different) and select the category "Integration".
-    *   Click "Add".
+    *   Click on the three dots in the top right corner and select `Custom repositories`.
+    *   Enter the URL of this repository (`https://github.com/fischerq/ha-braiins-pool/`) and select the category `Integration`.
+    *   Click `Add`.
 1.  **Install the integration.**
     *   Search for "Braiins Pool" in the HACS Integrations tab.
     *   Click "Download" and restart Home Assistant.
 1.  **Add the Braiins Pool integration.**
     *   Go to Settings -> Devices & Services -> Add Integration.
-    *   Search for "Braiins Pool" and select it.
+    *   Search for Braiins Pool` and select it.
     *   Enter your Braiins Pool API Key when prompted.
     *   To obtain your API key, follow the instructions in the Braiins Pool API     
         documentation: [https://academy.braiins.com/en/braiins-pool/monitoring/#api-configuration](https://academy.braiins.com/en/braiins-pool/monitoring/#api-configuration)

@@ -2,6 +2,8 @@
 
 Monitor your Braiins Pool mining statistics, account data, and worker performance directly within Home Assistant. This integration fetches a variety of data points from the Braiins Pool API to provide insights into your mining operations.
 
+[![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=braiins_pool)
+
 ### Installation
 
 This integration is available through HACS (Home Assistant Community Store).
@@ -9,7 +11,7 @@ This integration is available through HACS (Home Assistant Community Store).
 1.  **Add this repository as a Custom Repository in HACS.**
     *   In HACS, go to the Integrations tab.
     *   Click on the three dots in the top right corner and select "Custom repositories".
-    *   Enter the URL of this repository (`https://github.com/your_github_username/homeassistant-braiins-pool` - replace with the actual URL) and select the category "Integration".
+    *   Enter the URL of this repository (`https://github.com/custom-components/homeassistant-braiins-pool` - replace with the actual URL if different) and select the category "Integration".
     *   Click "Add".
 1.  **Install the integration.**
     *   Search for "Braiins Pool" in the HACS Integrations tab.
@@ -30,6 +32,9 @@ This integration will create sensors for:
 *   `all_time_reward`: Braiins Pool All Time Reward
 *   `pool_5m_hash_rate`: Braiins Pool 5m Hash Rate
 *   `ok_workers`: Braiins Pool Active Workers
+*   `today_reward_satoshi`: Braiins Pool Today's Reward Satoshi
+*   `current_balance_satoshi`: Braiins Pool Current Balance Satoshi
+*   `all_time_reward_satoshi`: Braiins Pool All Time Reward Satoshi
 
 ### Disclaimer
 

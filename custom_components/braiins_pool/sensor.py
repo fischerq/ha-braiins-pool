@@ -85,15 +85,9 @@ SENSOR_TYPES: tuple[SensorEntityDescription, ...] = (
 async def async_setup_entry(hass, config_entry, async_add_entities):
     """Set up the sensor platform."""
     coordinator: BraiinsDataUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id]
-    rewards_account_name = config_entry.data.get(
-        CONF_REWARDS_ACCOUNT_NAME
-    )  # Get account name
+    rewards_account_name = config_entry.data.get(CONF_REWARDS_ACCOUNT_NAME)
 
-    entities = [
-        BraiinsPoolSensor(coordinator, description, config_entry)  # Pass config_entry
-        for description in SENSOR_TYPES
-    ]
-
+    entities = [BraiinsPoolSensor(coordinator, description, config_entry) for description in SENSOR_TYPES]
     async_add_entities(entities)
 
 
@@ -106,14 +100,9 @@ class BraiinsPoolSensor(CoordinatorEntity, SensorEntity):
         """Initialize the sensor."""
         super().__init__(coordinator)
         self.entity_description = entity_description
-        self._config_entry = config_entry  # Store config_entry
-        # Use rewards_account_name for a more descriptive name if desired, or keep as is
-        # For example, self._attr_name = f"{config_entry.data.get(CONF_REWARDS_ACCOUNT_NAME)} {entity_description.name}"
-        # However, the original naming seems fine, as the device will carry the main account name.
+        self._config_entry = config_entry
         self._attr_name = entity_description.name
-        self._attr_unique_id = (
-            f"{self._config_entry.entry_id}_{self.entity_description.key}"
-        )
+        self._attr_unique_id = (f"{self._config_entry.entry_id}_{self.entity_description.key}")
 
     @property
     def device_info(self):

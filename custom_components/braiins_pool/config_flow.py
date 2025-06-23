@@ -23,7 +23,6 @@ class BraiinsPoolConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         errors = {}
 
-        # Basic validation (can add API call validation later)
         if not user_input.get(CONF_API_KEY):
             errors["base"] = "invalid_api_key"  # Use a specific error code
 
@@ -55,5 +54,5 @@ class BraiinsPoolConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="user",
             data_schema=data_schema,
             errors=errors,
-            last_step=True,  # Assuming this is the only configuration step for now
+            last_step=True,
         )

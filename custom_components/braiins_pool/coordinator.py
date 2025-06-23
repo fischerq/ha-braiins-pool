@@ -1,27 +1,22 @@
 """Data update coordinator for the Braiins Pool integration."""
 
-import asyncio
-import logging
-
-
 import aiohttp
-
+import asyncio
+from datetime import timedelta, datetime, timezone
+from decimal import Decimal
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from datetime import timedelta, datetime, timezone
-from decimal import Decimal
+import logging
 
+from .api import BraiinsPoolApiClient
 from .const import (
     DOMAIN,
-    API_HEADERS,
     CONF_API_KEY,
     SATOSHIS_PER_BTC,
 )
 
 _LOGGER = logging.getLogger(__name__)
-
-from .api import BraiinsPoolApiClient
 
 
 # Import the actual API client
@@ -31,14 +26,14 @@ class BraiinsDataUpdateCoordinator(DataUpdateCoordinator[dict]):
     def __init__(
         self,
         hass: HomeAssistant,
-        api_client: BraiinsPoolApiClient,  # Use the actual API client type hint
+        api_client: BraiinsPoolApiClient,
         update_interval: timedelta,
     ):
         """Initialize the coordinator."""
         super().__init__(
             hass,
             _LOGGER,
-            name=DOMAIN,  # type: ignore [arg-type]
+            name=DOMAIN,
             update_interval=update_interval,
         )
         self.api_client = api_client

@@ -9,12 +9,10 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .coordinator import BraiinsDataUpdateCoordinator
 from .api import BraiinsPoolApiClient
-from .const import DOMAIN, CONF_API_KEY
-
-# from .config_flow import BraiinsPoolConfigFlow
+from .const import DOMAIN, CONF_API_KEY, DEFAULT_SCAN_INTERVAL_MINS
 
 _LOGGER = logging.getLogger(__name__)
-SCAN_INTERVAL = timedelta(minutes=15)  # Define an update interval
+SCAN_INTERVAL = timedelta(minutes=DEFAULT_SCAN_INTERVAL_MINS)
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -35,8 +33,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
-    # Forward the setup to the sensor platform
-    # Ensure this is done *after* the coordinator is stored
     await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
 
     return True

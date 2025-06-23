@@ -2,22 +2,21 @@
 
 import logging
 import aiohttp
-import json  # Add this import at the top of the file
+import json
 
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
+API_HEADERS = {"Pool-Auth-Token": "{}", "Accept": "application/json"}
 
-from .const import (
-    API_HEADERS,
-    CONF_API_KEY,
-    API_URL_POOL_STATS,
-    API_URL_DAILY_REWARDS,
-    API_URL_USER_PROFILE,
-    API_URL_DAILY_HASHRATE,
-    API_URL_BLOCK_REWARDS,
-    API_URL_WORKERS,
-    API_URL_PAYOUTS,
-    DEFAULT_COIN,
+API_URL_POOL_STATS = "https://pool.braiins.com/stats/json/{}"
+API_URL_USER_PROFILE = "https://pool.braiins.com/accounts/profile/json/{}/"
+API_URL_DAILY_REWARDS = "https://pool.braiins.com/accounts/rewards/json/{}"
+API_URL_DAILY_HASHRATE = "https://pool.braiins.com/accounts/hash_rate_daily/json/{}/{}"
+API_URL_BLOCK_REWARDS = (
+    "https://pool.braiins.com/accounts/block_rewards/json/{}?from={}&to={}"
 )
+API_URL_WORKERS = "https://pool.braiins.com/accounts/workers/json/{}/"
+API_URL_PAYOUTS = "https://pool.braiins.com/accounts/payouts/json/{}?from={}&to={}"
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class BraiinsPoolApiException(Exception):
@@ -31,22 +30,27 @@ class BraiinsPoolAuthError(BraiinsPoolApiException):
 class BraiinsPoolApiClient:
     """API client for Braiins Pool."""
 
-    _LOGGER = logging.getLogger(__name__)
-
     def __init__(self, session: aiohttp.ClientSession, api_key: str):
         """Initialize."""
         self._session = session
         self._api_key = api_key
 
     async def _request(self, url: str):
-        """Helper method to perform API requests."""
+        """
+        Helper method to perform API requests to the Braiins Pool API.
+
+        Args:
+            url (str): The full URL of the API endpoint to request.
+
+        Returns:
+            dict: The JSON response from the API.
+
+        Raises:
+            BraiinsPoolApiException: If an API error or non-JSON response occurs.
+        """
         headers = {k: v.format(self._api_key) for k, v in API_HEADERS.items()}
         self._LOGGER.debug("Making API request to: %s, Headers: %s", url, headers)
         try:
-            # Assume BRAIINS_API_URL is the base URL and the provided url is the endpoint path
-            # If BRAIINS_API_URL is the full URL for stats, the daily rewards URL is also a full URL.
-            # This needs to be clarified in const.py or handled differently if not consistent.
-            # For now, assuming the provided url is the full endpoint URL.
             async with self._session.get(url, headers=headers) as response:
                 self._LOGGER.debug(
                     "Received API response: Status: %s, Headers: %s",
@@ -76,7 +80,7 @@ class BraiinsPoolApiClient:
                     "Braiins Pool API Authentication Error: Invalid API key or insufficient permissions."
                 )
                 raise BraiinsPoolAuthError("Invalid API key") from err
-            # For other ClientResponseErrors (like 401, 500)
+            # Other ClientResponseErrors (e.g. 401, 500)
             self._LOGGER.error(
                 "Error fetching data from Braiins Pool API: Status %s, Message: %s",
                 err.status,
@@ -86,7 +90,6 @@ class BraiinsPoolApiClient:
                 f"API error {err.status}: {err.message}"
             ) from err
         except aiohttp.ClientError as err:
-            # Re-raise aiohttp.ClientError directly
             raise err
         except (
             BraiinsPoolAuthError
@@ -98,9 +101,7 @@ class BraiinsPoolApiClient:
             raise
         except Exception as err:
             self._LOGGER.error(
-                "An unexpected error occurred during API request to %s: %s",
-                url,
-                err,
+                "An unexpected error occurred during API request to %s: %s", url, err
             )
             raise err
 

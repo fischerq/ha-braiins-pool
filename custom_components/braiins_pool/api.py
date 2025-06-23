@@ -3,6 +3,7 @@
 import logging
 import aiohttp
 import json
+from decimal import Decimal
 
 API_HEADERS = {"Pool-Auth-Token": "{}", "Accept": "application/json"}
 
@@ -106,36 +107,47 @@ class BraiinsPoolApiClient:
             raise err
 
     async def get_account_stats(self):
-        """Fetch account statistics from Braiins Pool API."""
+        """Fetch account statistics from Braiins Pool API. Not parsed yet."""
         url = API_URL_POOL_STATS.format(DEFAULT_COIN)
         return await self._request(url)
 
     async def get_daily_rewards(self):
-        """Fetch daily rewards from Braiins Pool API."""
+        """Fetch daily rewards from Braiins Pool API. Not parsed yet."""
         url = API_URL_DAILY_REWARDS.format(DEFAULT_COIN)
         return await self._request(url)
 
     async def get_user_profile(self, coin=DEFAULT_COIN):
         """Fetch user profile from Braiins Pool API."""
         url = API_URL_USER_PROFILE.format(coin)
-        return await self._request(url)
+        data = await self._request(url)
+        processed_data = {}
+
+        if coin == "btc" and "btc" in data:
+            btc_data = data["btc"]
+            processed_data["current_balance"] = Decimal(btc_data.get("current_balance", "0"))
+            processed_data["today_reward"] = Decimal(btc_data.get("today_reward", "0"))
+            processed_data["all_time_reward"] = Decimal(btc_data.get("all_time_reward", "0"))
+            processed_data["ok_workers"] = int(btc_data.get("ok_workers", 0))
+            processed_data["pool_5m_hash_rate"] = float(btc_data.get("hash_rate_5m", "0"))
+
+        return processed_data
 
     async def get_daily_hashrate(self, group="user", coin=DEFAULT_COIN):
-        """Fetch daily hashrate from Braiins Pool API."""
+        """Fetch daily hashrate from Braiins Pool API. Not parsed yet."""
         url = API_URL_DAILY_HASHRATE.format(group, coin)
         return await self._request(url)
 
     async def get_block_rewards(self, from_date: str, to_date: str, coin=DEFAULT_COIN):
-        """Fetch block rewards from Braiins Pool API."""
+        """Fetch block rewards from Braiins Pool API. Not parsed yet."""
         url = API_URL_BLOCK_REWARDS.format(coin, from_date, to_date)
         return await self._request(url)
 
     async def get_workers(self, coin=DEFAULT_COIN):
-        """Fetch worker data from Braiins Pool API."""
+        """Fetch worker data from Braiins Pool API. Not parsed yet."""
         url = API_URL_WORKERS.format(coin)
         return await self._request(url)
 
     async def get_payouts(self, from_date: str, to_date: str, coin=DEFAULT_COIN):
-        """Fetch payouts data from Braiins Pool API."""
+        """Fetch payouts data from Braiins Pool API. Not parsed yet."""
         url = API_URL_PAYOUTS.format(coin, from_date, to_date)
         return await self._request(url)

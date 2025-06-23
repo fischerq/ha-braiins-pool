@@ -1,21 +1,18 @@
-import logging
-import json
+import aiohttp
 import asyncio
+import json
+import logging
+import pytest
+from aiohttp import ClientError
 from datetime import timedelta
 from unittest.mock import AsyncMock, patch, MagicMock
-
-logging.basicConfig(level=logging.DEBUG)
-
-import pytest
-
-import aiohttp
-from aiohttp import ClientError
 
 from custom_components.braiins_pool.api import (
     BraiinsPoolApiClient,
     BraiinsPoolApiException,
-)  # Added BraiinsPoolApiException
+)
 
+logging.basicConfig(level=logging.DEBUG)
 pytestmark = pytest.mark.asyncio
 
 

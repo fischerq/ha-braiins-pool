@@ -107,7 +107,7 @@ async def test_get_account_stats_success(mock_logger, api_client_fixture):
     api_client, mock_session, api_key = api_client_fixture
     mock_data = {"test": "data"}
     mock_session.get.return_value = mock_response_factory(json_data=mock_data)
-
+    # get_account_stats now calls _request and returns the raw response from _request
     data = await api_client.get_account_stats()
 
     mock_session.get.assert_called_once_with(

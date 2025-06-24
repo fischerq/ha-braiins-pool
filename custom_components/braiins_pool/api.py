@@ -6,7 +6,6 @@ import json
 from decimal import Decimal
 
 API_HEADERS = {"Pool-Auth-Token": "{}", "Accept": "application/json"}
-
 API_URL_POOL_STATS = "https://pool.braiins.com/stats/json/{}"
 API_URL_USER_PROFILE = "https://pool.braiins.com/accounts/profile/json/{}/"
 API_URL_DAILY_REWARDS = "https://pool.braiins.com/accounts/rewards/json/{}"
@@ -16,6 +15,8 @@ API_URL_BLOCK_REWARDS = (
 )
 API_URL_WORKERS = "https://pool.braiins.com/accounts/workers/json/{}/"
 API_URL_PAYOUTS = "https://pool.braiins.com/accounts/payouts/json/{}?from={}&to={}"
+DEFAULT_COIN = "btc"
+
 
 _LOGGER = logging.getLogger(__name__)
 

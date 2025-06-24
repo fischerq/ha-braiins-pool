@@ -87,7 +87,10 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     coordinator: BraiinsDataUpdateCoordinator = hass.data[DOMAIN][config_entry.entry_id]
     rewards_account_name = config_entry.data.get(CONF_REWARDS_ACCOUNT_NAME)
 
-    entities = [BraiinsPoolSensor(coordinator, description, config_entry) for description in SENSOR_TYPES]
+    entities = [
+        BraiinsPoolSensor(coordinator, description, config_entry)
+        for description in SENSOR_TYPES
+    ]
     async_add_entities(entities)
 
 
@@ -102,7 +105,9 @@ class BraiinsPoolSensor(CoordinatorEntity, SensorEntity):
         self.entity_description = entity_description
         self._config_entry = config_entry
         self._attr_name = entity_description.name
-        self._attr_unique_id = (f"{self._config_entry.entry_id}_{self.entity_description.key}")
+        self._attr_unique_id = (
+            f"{self._config_entry.entry_id}_{self.entity_description.key}"
+        )
 
     @property
     def device_info(self):

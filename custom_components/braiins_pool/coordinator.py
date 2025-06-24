@@ -47,14 +47,26 @@ class BraiinsDataUpdateCoordinator(DataUpdateCoordinator[dict]):
             user_profile_data = await self.api_client.get_user_profile()
             processed_data["user_profile_data"] = user_profile_data  # Store raw data
 
-            processed_data["current_balance"] = user_profile_data.get("current_balance", 0.0)
+            processed_data["current_balance"] = user_profile_data.get(
+                "current_balance", 0.0
+            )
             processed_data["today_reward"] = user_profile_data.get("today_reward", 0.0)
-            processed_data["all_time_reward"] = user_profile_data.get("all_time_reward", 0.0)
+            processed_data["all_time_reward"] = user_profile_data.get(
+                "all_time_reward", 0.0
+            )
             processed_data["ok_workers"] = user_profile_data.get("ok_workers", 0)
-            processed_data["current_balance_satoshi"] = int(processed_data["current_balance"] * SATOSHIS_PER_BTC)
-            processed_data["today_reward_satoshi"] = int(processed_data["today_reward"] * SATOSHIS_PER_BTC)
-            processed_data["all_time_reward_satoshi"] = int(processed_data["all_time_reward"] * SATOSHIS_PER_BTC)
-            processed_data["pool_5m_hash_rate"] = user_profile_data.get("pool_5m_hash_rate", 0.0)
+            processed_data["current_balance_satoshi"] = int(
+                processed_data["current_balance"] * SATOSHIS_PER_BTC
+            )
+            processed_data["today_reward_satoshi"] = int(
+                processed_data["today_reward"] * SATOSHIS_PER_BTC
+            )
+            processed_data["all_time_reward_satoshi"] = int(
+                processed_data["all_time_reward"] * SATOSHIS_PER_BTC
+            )
+            processed_data["pool_5m_hash_rate"] = user_profile_data.get(
+                "pool_5m_hash_rate", 0.0
+            )
 
             return processed_data
         except Exception as err:  # Catch any exception during fetching or processing

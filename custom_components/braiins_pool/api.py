@@ -124,11 +124,17 @@ class BraiinsPoolApiClient:
 
         if coin == "btc" and "btc" in data:
             btc_data = data["btc"]
-            processed_data["current_balance"] = Decimal(btc_data.get("current_balance", "0"))
+            processed_data["current_balance"] = Decimal(
+                btc_data.get("current_balance", "0")
+            )
             processed_data["today_reward"] = Decimal(btc_data.get("today_reward", "0"))
-            processed_data["all_time_reward"] = Decimal(btc_data.get("all_time_reward", "0"))
+            processed_data["all_time_reward"] = Decimal(
+                btc_data.get("all_time_reward", "0")
+            )
             processed_data["ok_workers"] = int(btc_data.get("ok_workers", 0))
-            processed_data["pool_5m_hash_rate"] = float(btc_data.get("hash_rate_5m", "0"))
+            processed_data["pool_5m_hash_rate"] = float(
+                btc_data.get("hash_rate_5m", "0")
+            )
 
         return processed_data
 

@@ -9,9 +9,7 @@ from decimal import Decimal
 from aiohttp import ClientError
 from homeassistant.helpers.update_coordinator import UpdateFailed  # Import UpdateFailed
 from custom_components.braiins_pool.coordinator import BraiinsDataUpdateCoordinator
-from custom_components.braiins_pool.const import DEFAULT_SCAN_INTERVAL, SATOSHIS_PER_BTC
-
-# from homeassistant.helpers.update_coordinator import UpdateFailed # Not explicitly used in asserts, can remove if not needed for other reasons
+from custom_components.braiins_pool.const import DEFAULT_SCAN_INTERVAL_MINS, SATOSHIS_PER_BTC
 
 from freezegun import freeze_time
 
@@ -33,7 +31,7 @@ async def test_successful_update(hass):
     )  # Changed from get_account_stats
 
     coordinator = BraiinsDataUpdateCoordinator(
-        hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
+        hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL_MINS)
     )
     await coordinator.async_refresh()
 
@@ -71,7 +69,7 @@ async def test_successful_update_with_new_data(hass):
     mock_api_client.get_user_profile = AsyncMock(side_effect=mock_get_user_profile_data)
 
     coordinator = BraiinsDataUpdateCoordinator(
-        hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
+        hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL_MINS)
     )
     await coordinator.async_refresh()
 
@@ -106,7 +104,7 @@ async def test_update_failed_api_error(hass):
     mock_api_client.get_user_profile.side_effect = ClientError("API Error")
 
     coordinator = BraiinsDataUpdateCoordinator(
-        hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
+        hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL_MINS)
     )
     await coordinator.async_refresh()  # Call refresh directly
 
@@ -129,7 +127,7 @@ async def test_update_failed_parsing_error(hass):
     )
 
     coordinator = BraiinsDataUpdateCoordinator(
-        hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
+        hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL_MINS)
     )
     await coordinator.async_refresh()
 
@@ -165,7 +163,7 @@ async def test_update_user_profile_parsing_error_for_rewards(hass):  # Renamed t
     )
 
     coordinator = BraiinsDataUpdateCoordinator(
-        hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
+        hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL_MINS)
     )
     await coordinator.async_refresh()
 
@@ -201,7 +199,7 @@ async def test_update_failed_missing_new_data_keys(hass):
     )
 
     coordinator = BraiinsDataUpdateCoordinator(
-        hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL)
+        hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL_MINS)
     )
     await coordinator.async_refresh()
 

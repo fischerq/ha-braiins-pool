@@ -24,14 +24,19 @@ async def test_successful_update(hass):
     "Test successful data update."
     mock_api_client = AsyncMock()
 
-    async def mock_get_account_stats(*args, **kwargs):
+    # This mock should return data as if processed by BraiinsPoolApiClient.get_user_profile
+    async def mock_get_processed_user_profile(*args, **kwargs):
         return {
-            "btc": {"current_balance": "1.23"}  # Use string for precision
-        }  # Assuming this was meant for get_user_profile based on other tests
+            "current_balance": Decimal("1.23"),
+            "today_reward": Decimal("0"), # Assuming default from api.py if not in raw
+            "all_time_reward": Decimal("0"), # Assuming default from api.py if not in raw
+            "ok_workers": 0, # Assuming default from api.py if not in raw
+            "pool_5m_hash_rate": 0.0 # Assuming default from api.py if not in raw
+        }
 
     mock_api_client.get_user_profile = AsyncMock(
-        side_effect=mock_get_account_stats
-    )  # Changed from get_account_stats
+        side_effect=mock_get_processed_user_profile
+    )
 
     coordinator = BraiinsDataUpdateCoordinator(
         hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL_MINS)
@@ -58,18 +63,17 @@ async def test_successful_update_with_new_data(hass):
     """Test successful data update including new endpoints and satoshi conversions."""
     mock_api_client = AsyncMock()
 
-    async def mock_get_user_profile_data(*args, **kwargs):  # Renamed for clarity
+    # This mock should return data as if processed by BraiinsPoolApiClient.get_user_profile
+    async def mock_get_processed_user_profile_data(*args, **kwargs):
         return {
-            "btc": {
-                "current_balance": "2.50000000",  # String as per API
-                "all_time_reward": "10.12345678",  # String as per API
-                "ok_workers": 10,  # Integer
-                "today_reward": "0.00000001",  # 1 satoshi, String as per API
-                "hash_rate_5m": "500.0",  # String as per API
-            }
+            "current_balance": Decimal("2.50000000"),
+            "all_time_reward": Decimal("10.12345678"),
+            "ok_workers": 10,
+            "today_reward": Decimal("0.00000001"),
+            "pool_5m_hash_rate": 500.0, # API client converts this to float
         }
 
-    mock_api_client.get_user_profile = AsyncMock(side_effect=mock_get_user_profile_data)
+    mock_api_client.get_user_profile = AsyncMock(side_effect=mock_get_processed_user_profile_data)
 
     coordinator = BraiinsDataUpdateCoordinator(
         hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL_MINS)
@@ -91,11 +95,12 @@ async def test_successful_update_with_new_data(hass):
 
     assert coordinator.data["pool_5m_hash_rate"] == 500.0
 
-    # Check that the raw data is stored
+    # Check that the (now processed) data is stored under 'user_profile_data' key as well
     assert (
-        coordinator.data["user_profile_data"]["btc"]["current_balance"] == "2.50000000"
+        coordinator.data["user_profile_data"]["current_balance"] == Decimal("2.50000000")
     )
-    # Other raw data fields are not fetched by the coordinator, so no need to assert them here
+    # Other raw data fields are not fetched by the coordinator, if the mock returns processed data.
+    # The key "user_profile_data" in coordinator.data now holds the processed dict.
 
 
 @pytest.mark.asyncio
@@ -190,15 +195,19 @@ async def test_update_failed_missing_new_data_keys(hass):
     "Test data update failure due to missing keys in new data."
     mock_api_client = AsyncMock()
 
-    async def mock_get_user_profile_missing_keys(*args, **kwargs):
+    # This mock should return data as if processed by BraiinsPoolApiClient.get_user_profile
+    # but with some keys missing, to test coordinator's handling of .get() with defaults.
+    async def mock_get_processed_user_profile_missing_keys(*args, **kwargs):
         return {
-            "btc": {
-                "current_balance": "4.56"
-            }  # Missing 'all_time_reward', 'ok_workers', 'today_reward', 'hash_rate_5m'
+            "current_balance": Decimal("4.56"),
+            # "today_reward" is missing, should default to Decimal("0") in coordinator
+            # "all_time_reward" is missing, should default to Decimal("0") in coordinator
+            # "ok_workers" is missing, should default to 0 in coordinator
+            # "pool_5m_hash_rate" is missing, should default to 0.0 in coordinator
         }
 
     mock_api_client.get_user_profile = AsyncMock(
-        side_effect=mock_get_user_profile_missing_keys
+        side_effect=mock_get_processed_user_profile_missing_keys
     )
 
     coordinator = BraiinsDataUpdateCoordinator(

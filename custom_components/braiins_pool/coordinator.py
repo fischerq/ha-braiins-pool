@@ -3,6 +3,7 @@
 import aiohttp
 import asyncio
 from datetime import timedelta, datetime, timezone
+from decimal import Decimal
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
@@ -45,27 +46,34 @@ class BraiinsDataUpdateCoordinator(DataUpdateCoordinator[dict]):
 
         try:
             user_profile_data = await self.api_client.get_user_profile()
-            processed_data["user_profile_data"] = user_profile_data  # Store raw data
+            # user_profile_data is already processed by the API client
+            # and contains Decimal types for monetary values.
 
-            processed_data["current_balance"] = user_profile_data.get(
-                "current_balance", 0.0
-            )
-            processed_data["today_reward"] = user_profile_data.get("today_reward", 0.0)
-            processed_data["all_time_reward"] = user_profile_data.get(
-                "all_time_reward", 0.0
-            )
-            processed_data["ok_workers"] = user_profile_data.get("ok_workers", 0)
+            processed_data["user_profile_data"] = user_profile_data # Store raw data for debugging or future use
+
+            # Directly use the values, assuming api_client returns them with correct types or defaults
+            # The .get() with a default is a fallback, though api_client should handle defaults.
+            current_balance = user_profile_data.get("current_balance", Decimal("0"))
+            today_reward = user_profile_data.get("today_reward", Decimal("0"))
+            all_time_reward = user_profile_data.get("all_time_reward", Decimal("0"))
+            ok_workers = user_profile_data.get("ok_workers", 0) # int
+            pool_5m_hash_rate = user_profile_data.get("pool_5m_hash_rate", 0.0) # float
+
+            processed_data["current_balance"] = current_balance
+            processed_data["today_reward"] = today_reward
+            processed_data["all_time_reward"] = all_time_reward
+            processed_data["ok_workers"] = ok_workers
+            processed_data["pool_5m_hash_rate"] = pool_5m_hash_rate
+
+            # Calculate satoshi values
             processed_data["current_balance_satoshi"] = int(
-                processed_data["current_balance"] * SATOSHIS_PER_BTC
+                current_balance * SATOSHIS_PER_BTC
             )
             processed_data["today_reward_satoshi"] = int(
-                processed_data["today_reward"] * SATOSHIS_PER_BTC
+                today_reward * SATOSHIS_PER_BTC
             )
             processed_data["all_time_reward_satoshi"] = int(
-                processed_data["all_time_reward"] * SATOSHIS_PER_BTC
-            )
-            processed_data["pool_5m_hash_rate"] = user_profile_data.get(
-                "pool_5m_hash_rate", 0.0
+                all_time_reward * SATOSHIS_PER_BTC
             )
 
             return processed_data
@@ -73,13 +81,15 @@ class BraiinsDataUpdateCoordinator(DataUpdateCoordinator[dict]):
             _LOGGER.error(
                 "Error fetching or processing data from Braiins Pool API: %s", err
             )
-            # Set default values and continue
-            processed_data["current_balance"] = 0.0
-            processed_data["today_reward"] = 0.0
-            processed_data["all_time_reward"] = 0.0
+            # Set default values using appropriate types
+            processed_data["current_balance"] = Decimal("0")
+            processed_data["today_reward"] = Decimal("0")
+            processed_data["all_time_reward"] = Decimal("0")
             processed_data["ok_workers"] = 0
             processed_data["current_balance_satoshi"] = 0
             processed_data["today_reward_satoshi"] = 0
             processed_data["all_time_reward_satoshi"] = 0
             processed_data["pool_5m_hash_rate"] = 0.0
+            # Store the raw (empty or partial) data if an error occurred after fetching user_profile_data
+            processed_data["user_profile_data"] = user_profile_data if 'user_profile_data' in locals() else {}
             raise UpdateFailed(f"Error updating data: {err}")

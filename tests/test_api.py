@@ -5,6 +5,7 @@ import logging
 import pytest
 from aiohttp import ClientError
 from datetime import timedelta
+from decimal import Decimal
 from unittest.mock import AsyncMock, patch, MagicMock
 
 from custom_components.braiins_pool.api import (
@@ -102,7 +103,7 @@ def mock_response_factory(
     )  # Pass it
 
 
-@patch("custom_components.braiins_pool.api.BraiinsPoolApiClient._LOGGER")
+@patch("custom_components.braiins_pool.api._LOGGER")
 async def test_get_account_stats_success(mock_logger, api_client_fixture):
     api_client, mock_session, api_key = api_client_fixture
     mock_data = {"test": "data"}
@@ -118,7 +119,7 @@ async def test_get_account_stats_success(mock_logger, api_client_fixture):
     mock_logger.debug.assert_called()
 
 
-@patch("custom_components.braiins_pool.api.BraiinsPoolApiClient._LOGGER")
+@patch("custom_components.braiins_pool.api._LOGGER")
 async def test_request_returns_non_json_response_content_type_error(
     mock_logger, api_client_fixture
 ):
@@ -151,7 +152,7 @@ async def test_request_returns_non_json_response_content_type_error(
     assert "<html><body>Error</body></html>"[:500] in args[3]  # Full snippet logged
 
 
-@patch("custom_components.braiins_pool.api.BraiinsPoolApiClient._LOGGER")
+@patch("custom_components.braiins_pool.api._LOGGER")
 async def test_request_returns_non_json_response_json_decode_error(
     mock_logger, api_client_fixture
 ):
@@ -200,7 +201,7 @@ async def test_request_returns_non_json_response_json_decode_error(
     assert args[3] == "{malformed_json"  # Expected response text
 
 
-@patch("custom_components.braiins_pool.api.BraiinsPoolApiClient._LOGGER")
+@patch("custom_components.braiins_pool.api._LOGGER")
 async def test_get_account_stats_401(mock_logger, api_client_fixture):
     api_client, mock_session, api_key = api_client_fixture
     mock_response_obj = mock_response_factory(
@@ -219,7 +220,7 @@ async def test_get_account_stats_401(mock_logger, api_client_fixture):
     mock_logger.error.assert_called()
 
 
-@patch("custom_components.braiins_pool.api.BraiinsPoolApiClient._LOGGER")
+@patch("custom_components.braiins_pool.api._LOGGER")
 async def test_get_account_stats_other_error(mock_logger, api_client_fixture):
     api_client, mock_session, api_key = api_client_fixture
     mock_response_obj = mock_response_factory(
@@ -238,7 +239,7 @@ async def test_get_account_stats_other_error(mock_logger, api_client_fixture):
     mock_logger.error.assert_called()
 
 
-@patch("custom_components.braiins_pool.api.BraiinsPoolApiClient._LOGGER")
+@patch("custom_components.braiins_pool.api._LOGGER")
 async def test_get_daily_rewards_success(mock_logger, api_client_fixture):
     api_client, mock_session, api_key = api_client_fixture
     mock_data = {"btc": {"daily_rewards": [{"total_reward": "0.12345"}]}}
@@ -252,7 +253,7 @@ async def test_get_daily_rewards_success(mock_logger, api_client_fixture):
     mock_logger.debug.assert_called()
 
 
-@patch("custom_components.braiins_pool.api.BraiinsPoolApiClient._LOGGER")
+@patch("custom_components.braiins_pool.api._LOGGER")
 async def test_get_daily_rewards_401(mock_logger, api_client_fixture):
     api_client, mock_session, api_key = api_client_fixture
     mock_response_obj = mock_response_factory(
@@ -271,7 +272,7 @@ async def test_get_daily_rewards_401(mock_logger, api_client_fixture):
     mock_logger.error.assert_called()
 
 
-@patch("custom_components.braiins_pool.api.BraiinsPoolApiClient._LOGGER")
+@patch("custom_components.braiins_pool.api._LOGGER")
 async def test_get_daily_rewards_client_error(mock_logger, api_client_fixture):
     api_client, mock_session, api_key = api_client_fixture
     expected_url = "https://pool.braiins.com/accounts/rewards/json/btc"
@@ -290,21 +291,40 @@ async def test_get_daily_rewards_client_error(mock_logger, api_client_fixture):
     mock_logger.error.assert_not_called()
 
 
-@patch("custom_components.braiins_pool.api.BraiinsPoolApiClient._LOGGER")
+@patch("custom_components.braiins_pool.api._LOGGER")
 async def test_get_user_profile_success(mock_logger, api_client_fixture):
     api_client, mock_session, api_key = api_client_fixture
-    mock_data = {"test": "user_profile_data"}
-    mock_session.get.return_value = mock_response_factory(json_data=mock_data)
-    data = await api_client.get_user_profile()
+    # Simulate raw API response data that get_user_profile expects
+    raw_api_data = {
+        "btc": {
+            "current_balance": "1.23",
+            "today_reward": "0.10000000", # 8 decimal places
+            "all_time_reward": "10.50000000", # 8 decimal places
+            "ok_workers": "5",
+            "hash_rate_5m": "12345.67" # As a string from API
+        }
+    }
+    # Expected processed data after get_user_profile handles it
+    expected_processed_data = {
+        "current_balance": Decimal("1.23"),
+        "today_reward": Decimal("0.10000000"),
+        "all_time_reward": Decimal("10.50000000"),
+        "ok_workers": 5,
+        "pool_5m_hash_rate": 12345.67 # float
+    }
+
+    mock_session.get.return_value = mock_response_factory(json_data=raw_api_data)
+    processed_data = await api_client.get_user_profile() # Renamed 'data' to 'processed_data' for clarity
+
     mock_session.get.assert_called_once_with(
         "https://pool.braiins.com/accounts/profile/json/btc/",
         headers={"Pool-Auth-Token": api_key, "Accept": "application/json"},
     )
-    assert data == mock_data
+    assert processed_data == expected_processed_data
     mock_logger.debug.assert_called()
 
 
-@patch("custom_components.braiins_pool.api.BraiinsPoolApiClient._LOGGER")
+@patch("custom_components.braiins_pool.api._LOGGER")
 async def test_get_daily_hashrate_success(mock_logger, api_client_fixture):
     api_client, mock_session, api_key = api_client_fixture
     mock_data = {"test": "daily_hashrate_data"}
@@ -318,7 +338,7 @@ async def test_get_daily_hashrate_success(mock_logger, api_client_fixture):
     mock_logger.debug.assert_called()
 
 
-@patch("custom_components.braiins_pool.api.BraiinsPoolApiClient._LOGGER")
+@patch("custom_components.braiins_pool.api._LOGGER")
 async def test_get_block_rewards_success(mock_logger, api_client_fixture):
     api_client, mock_session, api_key = api_client_fixture
     mock_data = {"test": "block_rewards_data"}
@@ -334,7 +354,7 @@ async def test_get_block_rewards_success(mock_logger, api_client_fixture):
     mock_logger.debug.assert_called()
 
 
-@patch("custom_components.braiins_pool.api.BraiinsPoolApiClient._LOGGER")
+@patch("custom_components.braiins_pool.api._LOGGER")
 async def test_get_workers_success(mock_logger, api_client_fixture):
     api_client, mock_session, api_key = api_client_fixture
     mock_data = {"test": "workers_data"}
@@ -348,7 +368,7 @@ async def test_get_workers_success(mock_logger, api_client_fixture):
     mock_logger.debug.assert_called()
 
 
-@patch("custom_components.braiins_pool.api.BraiinsPoolApiClient._LOGGER")
+@patch("custom_components.braiins_pool.api._LOGGER")
 async def test_get_payouts_success(mock_logger, api_client_fixture):
     api_client, mock_session, api_key = api_client_fixture
     mock_data = {"test": "payouts_data"}

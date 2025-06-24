@@ -51,21 +51,21 @@ class BraiinsPoolApiClient:
             BraiinsPoolApiException: If an API error or non-JSON response occurs.
         """
         headers = {k: v.format(self._api_key) for k, v in API_HEADERS.items()}
-        self._LOGGER.debug("Making API request to: %s, Headers: %s", url, headers)
+        _LOGGER.debug("Making API request to: %s, Headers: %s", url, headers)
         try:
             async with self._session.get(url, headers=headers) as response:
-                self._LOGGER.debug(
+                _LOGGER.debug(
                     "Received API response: Status: %s, Headers: %s",
                     response.status,
                     response.headers,
                 )
                 response_text = await response.text()
-                self._LOGGER.debug("API Response Body: %s", response_text)
+                _LOGGER.debug("API Response Body: %s", response_text)
                 response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
                 try:
                     return json.loads(response_text)
                 except (aiohttp.ContentTypeError, json.JSONDecodeError) as json_err:
-                    self._LOGGER.error(
+                    _LOGGER.error(
                         "API request to %s returned non-JSON response (status: %s). Response text: %s",
                         url,
                         response.status,
@@ -78,12 +78,12 @@ class BraiinsPoolApiClient:
             if (
                 err.status == 403
             ):  # Changed from 401 to 403 based on common API practices for forbidden access with valid key format but insufficient permissions
-                self._LOGGER.error(
+                _LOGGER.error(
                     "Braiins Pool API Authentication Error: Invalid API key or insufficient permissions."
                 )
                 raise BraiinsPoolAuthError("Invalid API key") from err
             # Other ClientResponseErrors (e.g. 401, 500)
-            self._LOGGER.error(
+            _LOGGER.error(
                 "Error fetching data from Braiins Pool API: Status %s, Message: %s",
                 err.status,
                 err.message,
@@ -102,7 +102,7 @@ class BraiinsPoolApiClient:
         ):  # Specific handler to re-raise without logging again
             raise
         except Exception as err:
-            self._LOGGER.error(
+            _LOGGER.error(
                 "An unexpected error occurred during API request to %s: %s", url, err
             )
             raise err

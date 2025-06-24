@@ -9,7 +9,10 @@ from decimal import Decimal
 from aiohttp import ClientError
 from homeassistant.helpers.update_coordinator import UpdateFailed  # Import UpdateFailed
 from custom_components.braiins_pool.coordinator import BraiinsDataUpdateCoordinator
-from custom_components.braiins_pool.const import DEFAULT_SCAN_INTERVAL_MINS, SATOSHIS_PER_BTC
+from custom_components.braiins_pool.const import (
+    DEFAULT_SCAN_INTERVAL_MINS,
+    SATOSHIS_PER_BTC,
+)
 
 from freezegun import freeze_time
 

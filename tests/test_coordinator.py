@@ -17,12 +17,6 @@ from freezegun import freeze_time
 
 pytestmark = pytest.mark.asyncio
 
-# import sys # eprint not used, can remove
-
-# def eprint(*args, **kwargs):
-#     print(*args, file=sys.stderr, **kwargs)
-
-
 @pytest.mark.asyncio
 async def test_successful_update(hass):
     "Test successful data update."

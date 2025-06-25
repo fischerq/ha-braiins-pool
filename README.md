@@ -1,6 +1,6 @@
 # Braiins Pool Home Assistant Integration
 
-Monitor your Braiins Pool mining statistics, account data, and worker performance directly within Home Assistant. This integration fetches a variety of data points from the Braiins Pool API to provide insights into your mining operations.
+Monitor your Braiins Pool mining statistics directly within Home Assistant. 
 
 ## Setup
 

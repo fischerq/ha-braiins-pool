@@ -102,6 +102,7 @@ def mock_response_factory(
         headers=headers,
     )  # Pass it
 
+
 @patch("custom_components.braiins_pool.api._LOGGER")
 async def test_get_user_profile_success(mock_logger, api_client_fixture):
     api_client, mock_session, api_key = api_client_fixture

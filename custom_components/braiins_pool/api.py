@@ -107,7 +107,6 @@ class BraiinsPoolApiClient:
             )
             raise err
 
-
     async def get_user_profile(self, coin=DEFAULT_COIN):
         """Fetch user profile from Braiins Pool API."""
         url = API_URL_USER_PROFILE.format(coin)

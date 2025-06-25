@@ -102,6 +102,40 @@ def mock_response_factory(
         headers=headers,
     )  # Pass it
 
+@patch("custom_components.braiins_pool.api._LOGGER")
+async def test_get_user_profile_success(mock_logger, api_client_fixture):
+    api_client, mock_session, api_key = api_client_fixture
+    # Simulate raw API response data that get_user_profile expects
+    raw_api_data = {
+        "btc": {
+            "current_balance": "1.23",
+            "today_reward": "0.10000000",  # 8 decimal places
+            "all_time_reward": "10.50000000",  # 8 decimal places
+            "ok_workers": "5",
+            "hash_rate_5m": "12345.67",  # As a string from API
+        }
+    }
+    # Expected processed data after get_user_profile handles it
+    expected_processed_data = {
+        "current_balance": Decimal("1.23"),
+        "today_reward": Decimal("0.10000000"),
+        "all_time_reward": Decimal("10.50000000"),
+        "ok_workers": 5,
+        "pool_5m_hash_rate": 12345.67,  # float
+    }
+
+    mock_session.get.return_value = mock_response_factory(json_data=raw_api_data)
+    processed_data = (
+        await api_client.get_user_profile()
+    )  # Renamed 'data' to 'processed_data' for clarity
+
+    mock_session.get.assert_called_once_with(
+        "https://pool.braiins.com/accounts/profile/json/btc/",
+        headers={"Pool-Auth-Token": api_key, "Accept": "application/json"},
+    )
+    assert processed_data == expected_processed_data
+    mock_logger.debug.assert_called()
+
 
 @patch("custom_components.braiins_pool.api._LOGGER")
 async def test_get_account_stats_success(mock_logger, api_client_fixture):
@@ -289,41 +323,6 @@ async def test_get_daily_rewards_client_error(mock_logger, api_client_fixture):
     )
     mock_logger.debug.assert_called()
     mock_logger.error.assert_not_called()
-
-
-@patch("custom_components.braiins_pool.api._LOGGER")
-async def test_get_user_profile_success(mock_logger, api_client_fixture):
-    api_client, mock_session, api_key = api_client_fixture
-    # Simulate raw API response data that get_user_profile expects
-    raw_api_data = {
-        "btc": {
-            "current_balance": "1.23",
-            "today_reward": "0.10000000",  # 8 decimal places
-            "all_time_reward": "10.50000000",  # 8 decimal places
-            "ok_workers": "5",
-            "hash_rate_5m": "12345.67",  # As a string from API
-        }
-    }
-    # Expected processed data after get_user_profile handles it
-    expected_processed_data = {
-        "current_balance": Decimal("1.23"),
-        "today_reward": Decimal("0.10000000"),
-        "all_time_reward": Decimal("10.50000000"),
-        "ok_workers": 5,
-        "pool_5m_hash_rate": 12345.67,  # float
-    }
-
-    mock_session.get.return_value = mock_response_factory(json_data=raw_api_data)
-    processed_data = (
-        await api_client.get_user_profile()
-    )  # Renamed 'data' to 'processed_data' for clarity
-
-    mock_session.get.assert_called_once_with(
-        "https://pool.braiins.com/accounts/profile/json/btc/",
-        headers={"Pool-Auth-Token": api_key, "Accept": "application/json"},
-    )
-    assert processed_data == expected_processed_data
-    mock_logger.debug.assert_called()
 
 
 @patch("custom_components.braiins_pool.api._LOGGER")

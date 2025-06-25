@@ -107,22 +107,12 @@ class BraiinsPoolApiClient:
             )
             raise err
 
-    async def get_account_stats(self):
-        """Fetch account statistics from Braiins Pool API. Not parsed yet."""
-        url = API_URL_POOL_STATS.format(DEFAULT_COIN)
-        return await self._request(url)
-
-    async def get_daily_rewards(self):
-        """Fetch daily rewards from Braiins Pool API. Not parsed yet."""
-        url = API_URL_DAILY_REWARDS.format(DEFAULT_COIN)
-        return await self._request(url)
 
     async def get_user_profile(self, coin=DEFAULT_COIN):
         """Fetch user profile from Braiins Pool API."""
         url = API_URL_USER_PROFILE.format(coin)
         data = await self._request(url)
         processed_data = {}
-
         if coin == "btc" and "btc" in data:
             btc_data = data["btc"]
             processed_data["current_balance"] = Decimal(
@@ -136,8 +126,17 @@ class BraiinsPoolApiClient:
             processed_data["pool_5m_hash_rate"] = float(
                 btc_data.get("hash_rate_5m", "0")
             )
-
         return processed_data
+
+    async def get_account_stats(self):
+        """Fetch account statistics from Braiins Pool API. Not parsed yet."""
+        url = API_URL_POOL_STATS.format(DEFAULT_COIN)
+        return await self._request(url)
+
+    async def get_daily_rewards(self):
+        """Fetch daily rewards from Braiins Pool API. Not parsed yet."""
+        url = API_URL_DAILY_REWARDS.format(DEFAULT_COIN)
+        return await self._request(url)
 
     async def get_daily_hashrate(self, group="user", coin=DEFAULT_COIN):
         """Fetch daily hashrate from Braiins Pool API. Not parsed yet."""

@@ -298,10 +298,10 @@ async def test_get_user_profile_success(mock_logger, api_client_fixture):
     raw_api_data = {
         "btc": {
             "current_balance": "1.23",
-            "today_reward": "0.10000000", # 8 decimal places
-            "all_time_reward": "10.50000000", # 8 decimal places
+            "today_reward": "0.10000000",  # 8 decimal places
+            "all_time_reward": "10.50000000",  # 8 decimal places
             "ok_workers": "5",
-            "hash_rate_5m": "12345.67" # As a string from API
+            "hash_rate_5m": "12345.67",  # As a string from API
         }
     }
     # Expected processed data after get_user_profile handles it
@@ -310,11 +310,13 @@ async def test_get_user_profile_success(mock_logger, api_client_fixture):
         "today_reward": Decimal("0.10000000"),
         "all_time_reward": Decimal("10.50000000"),
         "ok_workers": 5,
-        "pool_5m_hash_rate": 12345.67 # float
+        "pool_5m_hash_rate": 12345.67,  # float
     }
 
     mock_session.get.return_value = mock_response_factory(json_data=raw_api_data)
-    processed_data = await api_client.get_user_profile() # Renamed 'data' to 'processed_data' for clarity
+    processed_data = (
+        await api_client.get_user_profile()
+    )  # Renamed 'data' to 'processed_data' for clarity
 
     mock_session.get.assert_called_once_with(
         "https://pool.braiins.com/accounts/profile/json/btc/",

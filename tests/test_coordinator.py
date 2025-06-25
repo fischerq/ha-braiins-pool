@@ -28,10 +28,12 @@ async def test_successful_update(hass):
     async def mock_get_processed_user_profile(*args, **kwargs):
         return {
             "current_balance": Decimal("1.23"),
-            "today_reward": Decimal("0"), # Assuming default from api.py if not in raw
-            "all_time_reward": Decimal("0"), # Assuming default from api.py if not in raw
-            "ok_workers": 0, # Assuming default from api.py if not in raw
-            "pool_5m_hash_rate": 0.0 # Assuming default from api.py if not in raw
+            "today_reward": Decimal("0"),  # Assuming default from api.py if not in raw
+            "all_time_reward": Decimal(
+                "0"
+            ),  # Assuming default from api.py if not in raw
+            "ok_workers": 0,  # Assuming default from api.py if not in raw
+            "pool_5m_hash_rate": 0.0,  # Assuming default from api.py if not in raw
         }
 
     mock_api_client.get_user_profile = AsyncMock(
@@ -70,10 +72,12 @@ async def test_successful_update_with_new_data(hass):
             "all_time_reward": Decimal("10.12345678"),
             "ok_workers": 10,
             "today_reward": Decimal("0.00000001"),
-            "pool_5m_hash_rate": 500.0, # API client converts this to float
+            "pool_5m_hash_rate": 500.0,  # API client converts this to float
         }
 
-    mock_api_client.get_user_profile = AsyncMock(side_effect=mock_get_processed_user_profile_data)
+    mock_api_client.get_user_profile = AsyncMock(
+        side_effect=mock_get_processed_user_profile_data
+    )
 
     coordinator = BraiinsDataUpdateCoordinator(
         hass, mock_api_client, timedelta(seconds=DEFAULT_SCAN_INTERVAL_MINS)
@@ -96,8 +100,8 @@ async def test_successful_update_with_new_data(hass):
     assert coordinator.data["pool_5m_hash_rate"] == 500.0
 
     # Check that the (now processed) data is stored under 'user_profile_data' key as well
-    assert (
-        coordinator.data["user_profile_data"]["current_balance"] == Decimal("2.50000000")
+    assert coordinator.data["user_profile_data"]["current_balance"] == Decimal(
+        "2.50000000"
     )
     # Other raw data fields are not fetched by the coordinator, if the mock returns processed data.
     # The key "user_profile_data" in coordinator.data now holds the processed dict.

@@ -49,15 +49,17 @@ class BraiinsDataUpdateCoordinator(DataUpdateCoordinator[dict]):
             # user_profile_data is already processed by the API client
             # and contains Decimal types for monetary values.
 
-            processed_data["user_profile_data"] = user_profile_data # Store raw data for debugging or future use
+            processed_data["user_profile_data"] = (
+                user_profile_data  # Store raw data for debugging or future use
+            )
 
             # Directly use the values, assuming api_client returns them with correct types or defaults
             # The .get() with a default is a fallback, though api_client should handle defaults.
             current_balance = user_profile_data.get("current_balance", Decimal("0"))
             today_reward = user_profile_data.get("today_reward", Decimal("0"))
             all_time_reward = user_profile_data.get("all_time_reward", Decimal("0"))
-            ok_workers = user_profile_data.get("ok_workers", 0) # int
-            pool_5m_hash_rate = user_profile_data.get("pool_5m_hash_rate", 0.0) # float
+            ok_workers = user_profile_data.get("ok_workers", 0)  # int
+            pool_5m_hash_rate = user_profile_data.get("pool_5m_hash_rate", 0.0)  # float
 
             processed_data["current_balance"] = current_balance
             processed_data["today_reward"] = today_reward
@@ -91,5 +93,7 @@ class BraiinsDataUpdateCoordinator(DataUpdateCoordinator[dict]):
             processed_data["all_time_reward_satoshi"] = 0
             processed_data["pool_5m_hash_rate"] = 0.0
             # Store the raw (empty or partial) data if an error occurred after fetching user_profile_data
-            processed_data["user_profile_data"] = user_profile_data if 'user_profile_data' in locals() else {}
+            processed_data["user_profile_data"] = (
+                user_profile_data if "user_profile_data" in locals() else {}
+            )
             raise UpdateFailed(f"Error updating data: {err}")
